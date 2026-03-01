@@ -1,0 +1,57 @@
+{
+  "cities": [
+    {"city_id": "paris", "name": "Paris"},
+    {"city_id": "bruxelles", "name": "Bruxelles"},
+    {"city_id": "amsterdam", "name": "Amsterdam"},
+    {"city_id": "frankfurt", "name": "Frankfurt"},
+    {"city_id": "zurich", "name": "Zurich"}
+  ],
+  "routes": [
+    {
+      "route_id": "paris_bruxelles_1",
+      "city_a": "paris",
+      "city_b": "bruxelles",
+      "length": 2,
+      "color": "red",
+      "parallel_group": "paris_bruxelles"
+    },
+    {
+      "route_id": "paris_bruxelles_2",
+      "city_a": "paris",
+      "city_b": "bruxelles",
+      "length": 2,
+      "color": "yellow",
+      "parallel_group": "paris_bruxelles"
+    },
+    {
+      "route_id": "bruxelles_amsterdam",
+      "city_a": "bruxelles",
+      "city_b": "amsterdam",
+      "length": 1,
+      "color": "black"
+    },
+    {
+      "route_id": "paris_frankfurt",
+      "city_a": "paris",
+      "city_b": "frankfurt",
+      "length": 3,
+      "color": "white",
+      "is_tunnel": true
+    },
+    {
+      "route_id": "frankfurt_amsterdam",
+      "city_a": "frankfurt",
+      "city_b": "amsterdam",
+      "length": 2,
+      "color": "green"
+    },
+    {
+      "route_id": "frankfurt_zurich",
+      "city_a": "frankfurt",
+      "city_b": "zurich",
+      "length": 2,
+      "color": "blue",
+      "ferry_locomotives_required": 1
+    }
+  ]
+}
