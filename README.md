@@ -61,3 +61,69 @@ print(path_risk, cost_risk)
 ```bash
 python -m pytest -q
 ```
+
+## Run as CLI
+
+You can now run route queries directly:
+
+```bash
+python -m ttr_europe --start paris --target amsterdam
+```
+
+Include train-color breakdown for the shortest path:
+
+```bash
+python -m ttr_europe --start paris --target amsterdam --breakdown
+```
+
+Example with blocked route and risk-adjusted cost:
+
+```bash
+python -m ttr_europe \
+  --start paris \
+  --target zurich \
+  --player me \
+  --claim bruxelles_amsterdam:opponent \
+  --cost risk
+```
+
+## Convert CSV data to JSON
+
+To convert `cities.csv`, `routes.csv`, and `destinations.csv` into JSON files:
+
+```bash
+python -m ttr_europe.csv_converter
+```
+
+This writes:
+
+- `data/europe_board_from_csv.json` (compatible with `BoardGraph.from_json`)
+- `data/europe_destination_tickets_from_csv.json`
+- `data/europe_sample_board_from_destinations.json` (sample-board-format template)
+- `data/europe_sample_board_from_routes.json` (sample-board-format template from `routes.csv`)
+
+In `europe_sample_board_from_destinations.json`, route `length` is inferred from
+ticket `points` using:
+
+- 1 -> 1
+- 2 -> 2
+- 4 -> 3
+- 7 -> 4
+- 15 -> 6
+- 21 -> 8
+
+Routes with ticket points outside this mapping are emitted with `length: 0` and
+`needs_manual_length: true` so you can fill them manually.
+
+In `europe_sample_board_from_routes.json`, routes that came from `Colored=true` are
+marked with `needs_manual_color: true` so you can fill color values.
+
+## Render board map
+
+You can render the coordinate-based board JSON as an SVG map:
+
+```bash
+python -m ttr_europe.map_renderer --board data/europe_board_from_csv.json --out data/europe_board_map.svg
+```
+
+Open `data/europe_board_map.svg` in your browser.

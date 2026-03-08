@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import heapq
+from collections import defaultdict
 from collections.abc import Callable
 
 from .game_state import GameState
@@ -63,3 +64,11 @@ def shortest_path(
 
     route_path.reverse()
     return route_path, best_cost[target_city]
+
+
+def trains_by_color(state: GameState, route_ids: list[str]) -> dict[str, int]:
+    breakdown: dict[str, int] = defaultdict(int)
+    for route_id in route_ids:
+        route = state.board.routes[route_id]
+        breakdown[route.color.value] += route.length
+    return dict(sorted(breakdown.items()))
