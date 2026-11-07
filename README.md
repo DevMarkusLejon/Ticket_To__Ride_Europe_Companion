@@ -12,6 +12,8 @@ python -m ttr_europe.tournament --candidate hoarder --games 20 --seed 10000
 
 The [pilot results and board audit](docs/europe-tournament.md) cover six policies, alternate seats, game length, ticketless wins, and the rule assumptions.
 
+The [18-turn versus 25-turn tournament](docs/europe-wait-comparison.md) compares the two waits on 12,288 matched deals across three opponent tables.
+
 ## What this implements
 
 - **BoardGraph** (immutable): cities, routes, and adjacency lists loaded from JSON.
