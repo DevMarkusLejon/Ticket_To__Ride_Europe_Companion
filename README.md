@@ -1,6 +1,16 @@
 # Ticket_To__Ride_Europe_Companion
 
-Python graph tooling for modeling **Ticket to Ride: Europe** routes as an undirected weighted multigraph.
+Python route planning and seeded strategy tournaments for classic **Ticket to Ride: Europe**.
+
+## Run the strategy experiment
+
+From the repository root, using Python 3.10 or newer, play 20 four-player games with a Hoarder against three Regulars.
+
+```bash
+python -m ttr_europe.tournament --candidate hoarder --games 20 --seed 10000
+```
+
+The [pilot results and board audit](docs/europe-tournament.md) cover six policies, alternate seats, game length, ticketless wins, and the rule assumptions.
 
 ## What this implements
 
@@ -102,21 +112,9 @@ This writes:
 - `data/europe_sample_board_from_destinations.json` (sample-board-format template)
 - `data/europe_sample_board_from_routes.json` (sample-board-format template from `routes.csv`)
 
-In `europe_sample_board_from_destinations.json`, route `length` is inferred from
-ticket `points` using:
+Use `europe_board_from_csv.json` for the full board and `europe_destination_tickets_from_csv.json` for the deck. Each row of `routes.csv` specifies the color and cost of one physical track. Double tracks have two rows. `destinations.csv` identifies the six long tickets explicitly.
 
-- 1 -> 1
-- 2 -> 2
-- 4 -> 3
-- 7 -> 4
-- 15 -> 6
-- 21 -> 8
-
-Routes with ticket points outside this mapping are emitted with `length: 0` and
-`needs_manual_length: true` so you can fill them manually.
-
-In `europe_sample_board_from_routes.json`, routes that came from `Colored=true` are
-marked with `needs_manual_color: true` so you can fill color values.
+`europe_sample_board_from_destinations.json` is a legacy conversion example. It treats ticket endpoints as edges and maps points to lengths, which produces fictitious routes. The tournament loads the two audited files above. The converter still accepts older route CSVs with a `Colored` flag and marks their unknown colors in the routes-based sample.
 
 ## Render board map
 

@@ -4,277 +4,323 @@
       "ticket_id": "venezia_constantinople",
       "source_city": "venezia",
       "target_city": "constantinople",
-      "points": 10
+      "points": 10,
+      "type": "regular"
     },
     {
       "ticket_id": "london_wien",
       "source_city": "london",
       "target_city": "wien",
-      "points": 10
+      "points": 10,
+      "type": "regular"
     },
     {
       "ticket_id": "angora_kharkov",
       "source_city": "angora",
       "target_city": "kharkov",
-      "points": 10
+      "points": 10,
+      "type": "regular"
     },
     {
       "ticket_id": "essen_kyiv",
       "source_city": "essen",
       "target_city": "kyiv",
-      "points": 10
+      "points": 10,
+      "type": "regular"
     },
     {
       "ticket_id": "riga_bucuresti",
       "source_city": "riga",
       "target_city": "bucuresti",
-      "points": 10
+      "points": 10,
+      "type": "regular"
     },
     {
       "ticket_id": "stockholm_wien",
       "source_city": "stockholm",
       "target_city": "wien",
-      "points": 10
+      "points": 11,
+      "type": "regular"
     },
     {
       "ticket_id": "athina_wilno",
       "source_city": "athina",
       "target_city": "wilno",
-      "points": 11
+      "points": 11,
+      "type": "regular"
     },
     {
       "ticket_id": "amsterdam_wilno",
       "source_city": "amsterdam",
       "target_city": "wilno",
-      "points": 12
+      "points": 12,
+      "type": "regular"
     },
     {
       "ticket_id": "berlin_moskva",
       "source_city": "berlin",
       "target_city": "moskva",
-      "points": 12
+      "points": 12,
+      "type": "regular"
     },
     {
       "ticket_id": "frankfurt_smolensk",
       "source_city": "frankfurt",
       "target_city": "smolensk",
-      "points": 13
+      "points": 13,
+      "type": "regular"
     },
     {
       "ticket_id": "roma_smyrna",
       "source_city": "roma",
       "target_city": "smyrna",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "madrid_zurich",
       "source_city": "madrid",
       "target_city": "zurich",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "paris_wien",
       "source_city": "paris",
       "target_city": "wien",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "brest_venezia",
       "source_city": "brest",
       "target_city": "venezia",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "palermo_constantinople",
       "source_city": "palermo",
       "target_city": "constantinople",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "madrid_dieppe",
       "source_city": "madrid",
       "target_city": "dieppe",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "berlin_bucuresti",
       "source_city": "berlin",
       "target_city": "bucuresti",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "barcelona_bruxelles",
       "source_city": "barcelona",
       "target_city": "bruxelles",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "berlin_roma",
       "source_city": "berlin",
       "target_city": "roma",
-      "points": 9
+      "points": 9,
+      "type": "regular"
     },
     {
       "ticket_id": "bruxelles_danzic",
       "source_city": "bruxelles",
       "target_city": "danzic",
-      "points": 9
+      "points": 9,
+      "type": "regular"
     },
     {
       "ticket_id": "paris_zagrab",
       "source_city": "paris",
       "target_city": "zagrab",
-      "points": 7
+      "points": 7,
+      "type": "regular"
     },
     {
       "ticket_id": "amsterdam_pamplona",
       "source_city": "amsterdam",
       "target_city": "pamplona",
-      "points": 7
+      "points": 7,
+      "type": "regular"
     },
     {
       "ticket_id": "london_berlin",
       "source_city": "london",
       "target_city": "berlin",
-      "points": 7
+      "points": 7,
+      "type": "regular"
     },
     {
       "ticket_id": "brest_marseille",
       "source_city": "brest",
       "target_city": "marseille",
-      "points": 7
+      "points": 7,
+      "type": "regular"
     },
     {
       "ticket_id": "edinburgh_paris",
       "source_city": "edinburgh",
       "target_city": "paris",
-      "points": 7
+      "points": 7,
+      "type": "regular"
     },
     {
       "ticket_id": "marseille_essen",
       "source_city": "marseille",
       "target_city": "essen",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "smolensk_rostov",
       "source_city": "smolensk",
       "target_city": "rostov",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "barcelona_munchen",
       "source_city": "barcelona",
       "target_city": "munchen",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "sarajevo_sevastopol",
       "source_city": "sarajevo",
       "target_city": "sevastopol",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "kyiv_sochi",
       "source_city": "kyiv",
       "target_city": "sochi",
-      "points": 8
+      "points": 8,
+      "type": "regular"
     },
     {
       "ticket_id": "athina_angora",
       "source_city": "athina",
       "target_city": "angora",
-      "points": 5
+      "points": 5,
+      "type": "regular"
     },
     {
       "ticket_id": "sofia_smyrna",
       "source_city": "sofia",
       "target_city": "smyrna",
-      "points": 5
+      "points": 5,
+      "type": "regular"
     },
     {
       "ticket_id": "frankfurt_khobenhaven",
       "source_city": "frankfurt",
       "target_city": "khobenhaven",
-      "points": 5
+      "points": 5,
+      "type": "regular"
     },
     {
       "ticket_id": "budapest_sofia",
       "source_city": "budapest",
       "target_city": "sofia",
-      "points": 5
+      "points": 5,
+      "type": "regular"
     },
     {
       "ticket_id": "rostov_erzurum",
       "source_city": "rostov",
       "target_city": "erzurum",
-      "points": 5
+      "points": 5,
+      "type": "regular"
     },
     {
       "ticket_id": "warzawa_smolensk",
       "source_city": "warzawa",
       "target_city": "smolensk",
-      "points": 6
+      "points": 6,
+      "type": "regular"
     },
     {
       "ticket_id": "zurich_brindisi",
       "source_city": "zurich",
       "target_city": "brindisi",
-      "points": 6
+      "points": 6,
+      "type": "regular"
     },
     {
       "ticket_id": "zagrab_brindisi",
       "source_city": "zagrab",
       "target_city": "brindisi",
-      "points": 6
+      "points": 6,
+      "type": "regular"
     },
     {
       "ticket_id": "kyiv_petrograd",
       "source_city": "kyiv",
       "target_city": "petrograd",
-      "points": 6
+      "points": 6,
+      "type": "regular"
     },
     {
       "ticket_id": "zurich_budapest",
       "source_city": "zurich",
       "target_city": "budapest",
-      "points": 6
+      "points": 6,
+      "type": "regular"
     },
     {
       "ticket_id": "palermo_moskva",
       "source_city": "palermo",
       "target_city": "moskva",
-      "points": 20
+      "points": 20,
+      "type": "long"
     },
     {
       "ticket_id": "brest_petrograd",
       "source_city": "brest",
       "target_city": "petrograd",
-      "points": 20
+      "points": 20,
+      "type": "long"
     },
     {
       "ticket_id": "lisboa_danzic",
       "source_city": "lisboa",
       "target_city": "danzic",
-      "points": 20
+      "points": 20,
+      "type": "long"
     },
     {
       "ticket_id": "edinburgh_athina",
       "source_city": "edinburgh",
       "target_city": "athina",
-      "points": 21
+      "points": 21,
+      "type": "long"
     },
     {
       "ticket_id": "cadiz_stockholm",
       "source_city": "cadiz",
       "target_city": "stockholm",
-      "points": 21
+      "points": 21,
+      "type": "long"
     },
     {
       "ticket_id": "khobenhaven_erzurum",
       "source_city": "khobenhaven",
       "target_city": "erzurum",
-      "points": 21
+      "points": 21,
+      "type": "long"
     }
   ]
 }

@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from enum import Enum
 
+POINTS_BY_LENGTH = {1: 1, 2: 2, 3: 4, 4: 7, 6: 15, 8: 21}
+
 
 class RouteColor(str, Enum):
     BLACK = "black"

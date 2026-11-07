@@ -7,7 +7,8 @@ import re
 from collections import Counter, defaultdict
 from pathlib import Path
 
-POINTS_BY_LENGTH = {1: 1, 2: 2, 3: 4, 4: 7, 6: 15, 8: 21}
+from .models import POINTS_BY_LENGTH, RouteColor
+
 LENGTH_BY_POINTS = {points: length for length, points in POINTS_BY_LENGTH.items()}
 
 
@@ -55,6 +56,7 @@ def _load_routes(path: Path, name_to_id: dict[str, str]) -> list[dict]:
 
     with path.open(newline="", encoding="utf-8") as handle:
         reader = csv.DictReader(handle)
+        has_colors = "Color" in (reader.fieldnames or [])
         for item in reader:
             source_name = item["Source"].strip()
             target_name = item["Target"].strip()
@@ -64,6 +66,13 @@ def _load_routes(path: Path, name_to_id: dict[str, str]) -> list[dict]:
             city_a = name_to_id[source_name]
             city_b = name_to_id[target_name]
             route_base = f"{city_a}_{city_b}"
+            if has_colors:
+                color = RouteColor(item["Color"].strip().lower())
+                requires_color = color != RouteColor.GRAY
+            else:
+                # Older exports recorded only whether a color was required.
+                color = RouteColor.GRAY
+                requires_color = _parse_bool(item["Colored"])
 
             raw_routes.append(
                 {
@@ -71,12 +80,10 @@ def _load_routes(path: Path, name_to_id: dict[str, str]) -> list[dict]:
                     "city_a": city_a,
                     "city_b": city_b,
                     "length": int(item["Carriages"]),
-                    # CSV only provides whether a route requires a specific color.
-                    # Keep gray for compatibility and preserve source detail in extra metadata.
-                    "color": "gray",
+                    "color": color.value,
                     "is_tunnel": _parse_bool(item["Tunnel"]),
                     "ferry_locomotives_required": int(item["Engine"]),
-                    "requires_specific_color": _parse_bool(item["Colored"]),
+                    "requires_specific_color": requires_color,
                 }
             )
 
@@ -92,7 +99,8 @@ def _load_routes(path: Path, name_to_id: dict[str, str]) -> list[dict]:
     for route in raw_routes:
         base_id = route["route_id"]
         route_id_seen[base_id] += 1
-        if route_id_count[base_id] > 1:
+        # Preserve the original single-track ID when the audited CSV adds a second lane.
+        if route_id_count[base_id] > 1 and (route_id_seen[base_id] > 1 or not has_colors):
             route["route_id"] = f"{base_id}_{route_id_seen[base_id]}"
 
         pair = tuple(sorted((route["city_a"], route["city_b"])))
@@ -128,14 +136,17 @@ def _load_destinations(path: Path, name_to_id: dict[str, str]) -> list[dict]:
                 suffix += 1
             used_ids.add(ticket_id)
 
-            tickets.append(
-                {
-                    "ticket_id": ticket_id,
-                    "source_city": source_id,
-                    "target_city": target_id,
-                    "points": int(item["Points"]),
-                }
-            )
+            ticket = {
+                "ticket_id": ticket_id,
+                "source_city": source_id,
+                "target_city": target_id,
+                "points": int(item["Points"]),
+            }
+            if "Type" in item:
+                ticket["type"] = item["Type"].strip().lower()
+                if ticket["type"] not in {"regular", "long"}:
+                    raise ValueError(f"Unknown ticket type for {ticket_id}")
+            tickets.append(ticket)
 
     return tickets
 
@@ -182,14 +193,13 @@ def _build_sample_board_from_routes(cities: list[dict], routes: list[dict]) -> d
             "city_a": route["city_a"],
             "city_b": route["city_b"],
             "length": route["length"],
-            # Placeholder to keep the JSON loadable; fill this manually for colored routes.
-            "color": "gray",
+            "color": route["color"],
             "is_tunnel": route["is_tunnel"],
             "ferry_locomotives_required": route["ferry_locomotives_required"],
         }
         if route.get("parallel_group") is not None:
             sample_route["parallel_group"] = route["parallel_group"]
-        if route.get("requires_specific_color"):
+        if route.get("requires_specific_color") and route["color"] == "gray":
             sample_route["needs_manual_color"] = True
         sample_routes.append(sample_route)
 

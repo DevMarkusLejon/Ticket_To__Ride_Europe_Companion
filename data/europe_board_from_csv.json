@@ -289,7 +289,7 @@
       "city_a": "lisboa",
       "city_b": "cadiz",
       "length": 2,
-      "color": "gray",
+      "color": "blue",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -299,7 +299,7 @@
       "city_a": "madrid",
       "city_b": "lisboa",
       "length": 3,
-      "color": "gray",
+      "color": "pink",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -309,7 +309,7 @@
       "city_a": "madrid",
       "city_b": "cadiz",
       "length": 3,
-      "color": "gray",
+      "color": "orange",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -319,17 +319,29 @@
       "city_a": "madrid",
       "city_b": "pamplona",
       "length": 3,
-      "color": "gray",
+      "color": "black",
       "is_tunnel": true,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": true
+      "requires_specific_color": true,
+      "parallel_group": "madrid_pamplona"
+    },
+    {
+      "route_id": "madrid_pamplona_2",
+      "city_a": "madrid",
+      "city_b": "pamplona",
+      "length": 3,
+      "color": "white",
+      "is_tunnel": true,
+      "ferry_locomotives_required": 0,
+      "requires_specific_color": true,
+      "parallel_group": "madrid_pamplona"
     },
     {
       "route_id": "madrid_barcelona",
       "city_a": "madrid",
       "city_b": "barcelona",
       "length": 2,
-      "color": "gray",
+      "color": "yellow",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -339,7 +351,7 @@
       "city_a": "marseille",
       "city_b": "pamplona",
       "length": 4,
-      "color": "gray",
+      "color": "red",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -369,7 +381,7 @@
       "city_a": "pamplona",
       "city_b": "brest",
       "length": 4,
-      "color": "gray",
+      "color": "pink",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -379,10 +391,22 @@
       "city_a": "paris",
       "city_b": "pamplona",
       "length": 4,
-      "color": "gray",
+      "color": "blue",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": true
+      "requires_specific_color": true,
+      "parallel_group": "pamplona_paris"
+    },
+    {
+      "route_id": "paris_pamplona_2",
+      "city_a": "paris",
+      "city_b": "pamplona",
+      "length": 4,
+      "color": "green",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 0,
+      "requires_specific_color": true,
+      "parallel_group": "pamplona_paris"
     },
     {
       "route_id": "paris_marseille",
@@ -399,7 +423,7 @@
       "city_a": "paris",
       "city_b": "brest",
       "length": 3,
-      "color": "gray",
+      "color": "black",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -409,7 +433,7 @@
       "city_a": "paris",
       "city_b": "dieppe",
       "length": 1,
-      "color": "gray",
+      "color": "pink",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -432,14 +456,26 @@
       "color": "gray",
       "is_tunnel": false,
       "ferry_locomotives_required": 1,
-      "requires_specific_color": false
+      "requires_specific_color": false,
+      "parallel_group": "dieppe_london"
+    },
+    {
+      "route_id": "dieppe_london_2",
+      "city_a": "dieppe",
+      "city_b": "london",
+      "length": 2,
+      "color": "gray",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 1,
+      "requires_specific_color": false,
+      "parallel_group": "dieppe_london"
     },
     {
       "route_id": "dieppe_brest",
       "city_a": "dieppe",
       "city_b": "brest",
       "length": 2,
-      "color": "gray",
+      "color": "orange",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -449,27 +485,39 @@
       "city_a": "london",
       "city_b": "edinburgh",
       "length": 4,
-      "color": "gray",
+      "color": "black",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": true
+      "requires_specific_color": true,
+      "parallel_group": "edinburgh_london"
+    },
+    {
+      "route_id": "london_edinburgh_2",
+      "city_a": "london",
+      "city_b": "edinburgh",
+      "length": 4,
+      "color": "orange",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 0,
+      "requires_specific_color": true,
+      "parallel_group": "edinburgh_london"
     },
     {
       "route_id": "zurich_marseille",
       "city_a": "zurich",
       "city_b": "marseille",
       "length": 2,
-      "color": "gray",
+      "color": "pink",
       "is_tunnel": true,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": false
+      "requires_specific_color": true
     },
     {
       "route_id": "zurich_venezia",
       "city_a": "zurich",
       "city_b": "venezia",
       "length": 2,
-      "color": "gray",
+      "color": "green",
       "is_tunnel": true,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -489,7 +537,7 @@
       "city_a": "venezia",
       "city_b": "roma",
       "length": 2,
-      "color": "gray",
+      "color": "black",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -499,7 +547,7 @@
       "city_a": "zurich",
       "city_b": "munchen",
       "length": 2,
-      "color": "gray",
+      "color": "yellow",
       "is_tunnel": true,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -509,7 +557,7 @@
       "city_a": "munchen",
       "city_b": "venezia",
       "length": 2,
-      "color": "gray",
+      "color": "blue",
       "is_tunnel": true,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -519,7 +567,7 @@
       "city_a": "munchen",
       "city_b": "frankfurt",
       "length": 2,
-      "color": "gray",
+      "color": "pink",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -529,17 +577,29 @@
       "city_a": "frankfurt",
       "city_b": "paris",
       "length": 3,
-      "color": "gray",
+      "color": "white",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": true
+      "requires_specific_color": true,
+      "parallel_group": "frankfurt_paris"
+    },
+    {
+      "route_id": "frankfurt_paris_2",
+      "city_a": "frankfurt",
+      "city_b": "paris",
+      "length": 3,
+      "color": "orange",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 0,
+      "requires_specific_color": true,
+      "parallel_group": "frankfurt_paris"
     },
     {
       "route_id": "frankfurt_bruxelles",
       "city_a": "frankfurt",
       "city_b": "bruxelles",
       "length": 2,
-      "color": "gray",
+      "color": "blue",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -549,17 +609,29 @@
       "city_a": "bruxelles",
       "city_b": "paris",
       "length": 2,
-      "color": "gray",
+      "color": "red",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": true
+      "requires_specific_color": true,
+      "parallel_group": "bruxelles_paris"
+    },
+    {
+      "route_id": "bruxelles_paris_2",
+      "city_a": "bruxelles",
+      "city_b": "paris",
+      "length": 2,
+      "color": "yellow",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 0,
+      "requires_specific_color": true,
+      "parallel_group": "bruxelles_paris"
     },
     {
       "route_id": "bruxelles_dieppe",
       "city_a": "bruxelles",
       "city_b": "dieppe",
       "length": 2,
-      "color": "gray",
+      "color": "green",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -569,7 +641,7 @@
       "city_a": "bruxelles",
       "city_b": "amsterdam",
       "length": 1,
-      "color": "gray",
+      "color": "black",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -589,7 +661,7 @@
       "city_a": "amsterdam",
       "city_b": "frankfurt",
       "length": 2,
-      "color": "gray",
+      "color": "white",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -599,7 +671,7 @@
       "city_a": "frankfurt",
       "city_b": "essen",
       "length": 2,
-      "color": "gray",
+      "color": "green",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -609,7 +681,7 @@
       "city_a": "amsterdam",
       "city_b": "essen",
       "length": 3,
-      "color": "gray",
+      "color": "yellow",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -619,7 +691,7 @@
       "city_a": "munchen",
       "city_b": "wien",
       "length": 3,
-      "color": "gray",
+      "color": "orange",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -629,7 +701,7 @@
       "city_a": "berlin",
       "city_b": "wien",
       "length": 3,
-      "color": "gray",
+      "color": "green",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -639,7 +711,7 @@
       "city_a": "berlin",
       "city_b": "essen",
       "length": 2,
-      "color": "gray",
+      "color": "blue",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -649,10 +721,22 @@
       "city_a": "berlin",
       "city_b": "frankfurt",
       "length": 3,
-      "color": "gray",
+      "color": "black",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": true
+      "requires_specific_color": true,
+      "parallel_group": "berlin_frankfurt"
+    },
+    {
+      "route_id": "berlin_frankfurt_2",
+      "city_a": "berlin",
+      "city_b": "frankfurt",
+      "length": 3,
+      "color": "red",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 0,
+      "requires_specific_color": true,
+      "parallel_group": "berlin_frankfurt"
     },
     {
       "route_id": "wien_zagrab",
@@ -679,7 +763,7 @@
       "city_a": "roma",
       "city_b": "brindisi",
       "length": 2,
-      "color": "gray",
+      "color": "white",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -709,7 +793,7 @@
       "city_a": "budapest",
       "city_b": "zagrab",
       "length": 2,
-      "color": "gray",
+      "color": "orange",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -719,17 +803,29 @@
       "city_a": "budapest",
       "city_b": "wien",
       "length": 1,
-      "color": "gray",
+      "color": "red",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": true
+      "requires_specific_color": true,
+      "parallel_group": "budapest_wien"
+    },
+    {
+      "route_id": "budapest_wien_2",
+      "city_a": "budapest",
+      "city_b": "wien",
+      "length": 1,
+      "color": "white",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 0,
+      "requires_specific_color": true,
+      "parallel_group": "budapest_wien"
     },
     {
       "route_id": "zagrab_sarajevo",
       "city_a": "zagrab",
       "city_b": "sarajevo",
       "length": 3,
-      "color": "gray",
+      "color": "red",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -739,7 +835,7 @@
       "city_a": "sarajevo",
       "city_b": "athina",
       "length": 4,
-      "color": "gray",
+      "color": "green",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -749,7 +845,7 @@
       "city_a": "budapest",
       "city_b": "sarajevo",
       "length": 3,
-      "color": "gray",
+      "color": "pink",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -769,7 +865,7 @@
       "city_a": "athina",
       "city_b": "sofia",
       "length": 3,
-      "color": "gray",
+      "color": "pink",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -789,7 +885,7 @@
       "city_a": "sofia",
       "city_b": "constantinople",
       "length": 3,
-      "color": "gray",
+      "color": "blue",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -819,7 +915,7 @@
       "city_a": "constantinople",
       "city_b": "bucuresti",
       "length": 3,
-      "color": "gray",
+      "color": "yellow",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -879,17 +975,29 @@
       "city_a": "warzawa",
       "city_b": "berlin",
       "length": 4,
-      "color": "gray",
+      "color": "pink",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": true
+      "requires_specific_color": true,
+      "parallel_group": "berlin_warzawa"
+    },
+    {
+      "route_id": "warzawa_berlin_2",
+      "city_a": "warzawa",
+      "city_b": "berlin",
+      "length": 4,
+      "color": "yellow",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 0,
+      "requires_specific_color": true,
+      "parallel_group": "berlin_warzawa"
     },
     {
       "route_id": "warzawa_wien",
       "city_a": "warzawa",
       "city_b": "wien",
       "length": 4,
-      "color": "gray",
+      "color": "blue",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -909,7 +1017,7 @@
       "city_a": "smyrna",
       "city_b": "angora",
       "length": 3,
-      "color": "gray",
+      "color": "orange",
       "is_tunnel": true,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -919,7 +1027,7 @@
       "city_a": "angora",
       "city_b": "erzurum",
       "length": 3,
-      "color": "gray",
+      "color": "black",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -949,7 +1057,7 @@
       "city_a": "sochi",
       "city_b": "erzurum",
       "length": 3,
-      "color": "gray",
+      "color": "red",
       "is_tunnel": true,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -989,7 +1097,7 @@
       "city_a": "rostov",
       "city_b": "kharkov",
       "length": 2,
-      "color": "gray",
+      "color": "green",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -1019,7 +1127,7 @@
       "city_a": "sevastopol",
       "city_b": "bucuresti",
       "length": 4,
-      "color": "gray",
+      "color": "white",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -1029,7 +1137,7 @@
       "city_a": "moskva",
       "city_b": "smolensk",
       "length": 2,
-      "color": "gray",
+      "color": "orange",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -1039,7 +1147,7 @@
       "city_a": "moskva",
       "city_b": "petrograd",
       "length": 4,
-      "color": "gray",
+      "color": "white",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -1049,7 +1157,7 @@
       "city_a": "petrograd",
       "city_b": "wilno",
       "length": 4,
-      "color": "gray",
+      "color": "blue",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -1079,10 +1187,22 @@
       "city_a": "stockholm",
       "city_b": "khobenhaven",
       "length": 3,
-      "color": "gray",
+      "color": "white",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
-      "requires_specific_color": true
+      "requires_specific_color": true,
+      "parallel_group": "khobenhaven_stockholm"
+    },
+    {
+      "route_id": "stockholm_khobenhaven_2",
+      "city_a": "stockholm",
+      "city_b": "khobenhaven",
+      "length": 3,
+      "color": "yellow",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 0,
+      "requires_specific_color": true,
+      "parallel_group": "khobenhaven_stockholm"
     },
     {
       "route_id": "khobenhaven_essen",
@@ -1092,14 +1212,26 @@
       "color": "gray",
       "is_tunnel": false,
       "ferry_locomotives_required": 1,
-      "requires_specific_color": false
+      "requires_specific_color": false,
+      "parallel_group": "essen_khobenhaven"
+    },
+    {
+      "route_id": "khobenhaven_essen_2",
+      "city_a": "khobenhaven",
+      "city_b": "essen",
+      "length": 3,
+      "color": "gray",
+      "is_tunnel": false,
+      "ferry_locomotives_required": 1,
+      "requires_specific_color": false,
+      "parallel_group": "essen_khobenhaven"
     },
     {
       "route_id": "riga_danzic",
       "city_a": "riga",
       "city_b": "danzic",
       "length": 3,
-      "color": "gray",
+      "color": "black",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -1108,7 +1240,7 @@
       "route_id": "danzic_berlin",
       "city_a": "danzic",
       "city_b": "berlin",
-      "length": 3,
+      "length": 4,
       "color": "gray",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
@@ -1129,7 +1261,7 @@
       "city_a": "warzawa",
       "city_b": "wilno",
       "length": 3,
-      "color": "gray",
+      "color": "red",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -1139,7 +1271,7 @@
       "city_a": "wilno",
       "city_b": "riga",
       "length": 4,
-      "color": "gray",
+      "color": "green",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -1149,7 +1281,7 @@
       "city_a": "wilno",
       "city_b": "smolensk",
       "length": 3,
-      "color": "gray",
+      "color": "yellow",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
@@ -1169,15 +1301,15 @@
       "city_a": "smolensk",
       "city_b": "kyiv",
       "length": 3,
-      "color": "gray",
+      "color": "red",
       "is_tunnel": false,
       "ferry_locomotives_required": 0,
       "requires_specific_color": true
     },
     {
-      "route_id": "palermo_athina",
+      "route_id": "palermo_smyrna",
       "city_a": "palermo",
-      "city_b": "athina",
+      "city_b": "smyrna",
       "length": 6,
       "color": "gray",
       "is_tunnel": false,
