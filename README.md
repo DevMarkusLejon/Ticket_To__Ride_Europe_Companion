@@ -26,6 +26,20 @@ python -m ttr_europe.tournament --candidate hoarder --games 20 --seed 10000
 
 To rebuild both figures from the saved experiment CSVs, install Matplotlib and run `python -m experiments.plot_tournaments`. The simulations themselves use the Python standard library.
 
+## Continue the analysis in Codex Cloud
+
+Select `DevMarkusLejon/Ticket_To__Ride_Europe_Companion` on `main`. The board, tickets, tournament data and replay generator are in this repository. Add `DevMarkusLejon/DevMarkusLejon.github.io` to the environment if you also want to edit the published article under `projects/ticket-to-ride/`.
+
+Use Python 3.12 (the published comparison used 3.12.10). Run these commands from the simulator repository root to install the test and plotting tools, check the rules and play four games from the Fast Builders comparison.
+
+```bash
+python -m pip install -r requirements-dev.txt
+python -m pytest -q
+python -m ttr_europe.tournament --candidate finish --wait 25 --opponents fast fast fast --games 4 --seed 210000
+```
+
+**Next analysis.** In the [paired results](experiments/europe_wait_pairs.csv), filter to `table == "fast"`. Of the 4,096 deals, the candidate finished both tickets only at wait 18 on 411 deals and only at wait 25 on 86. Replay a small sample of each group using the recorded seed and seat. At the start of the candidate’s 25th personal turn, measure the additional trains needed to connect its tickets and the personal turns left before game end. Distinguish track losses during the opening wait from blocks to an active plan. The replay records a plan only when the bot actually uses one. See the [experiment methods](docs/europe-wait-comparison.md) for the seed ranges, seat rotation and win definition.
+
 ## What this implements
 
 - **BoardGraph** (immutable): cities, routes, and adjacency lists loaded from JSON.
