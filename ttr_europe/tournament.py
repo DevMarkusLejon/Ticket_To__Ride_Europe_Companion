@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import csv
 import math
+from collections.abc import Callable
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 from statistics import mean
@@ -12,7 +13,7 @@ from statistics import mean
 from .board_graph import BoardGraph
 from .models import POINTS_BY_LENGTH
 from .simulation import Game, Score, Ticket, load_europe, scores
-from .strategies import NAMES, Bot, Policy, choose_tickets
+from .strategies import NAMES, Bot, Move, Policy, choose_tickets
 
 
 @dataclass
@@ -25,18 +26,23 @@ class PlayedGame:
 
 
 def play(board: BoardGraph, tickets: list[Ticket], policies: list[Policy], seed: int,
-         checkpoint_at: int | None = None) -> PlayedGame:
+         checkpoint_at: int | None = None, *,
+         observe: Callable[[Game, int, Move], None] | None = None) -> PlayedGame:
     game = Game(board, tickets, len(policies), seed)
     bots = [Bot(policy) for policy in policies]
     for p, policy, offer in zip(game.players, policies, game.opening_offers):
         game.keep_tickets(p, offer, choose_tickets(policy, game, p, offer, True), opening=True)
+    if observe:
+        observe(game, 0, ("deal", None))
 
     final_action = None
     checkpoint = None
     for action in range(1, 2001):
         seat = (action - 1) % len(bots)
         player = game.players[seat]
-        bots[seat].take_turn(game, player, final_action is not None)
+        move = bots[seat].take_turn(game, player, final_action is not None)
+        if observe:
+            observe(game, action, move)
         if action == checkpoint_at:
             checkpoint = scores(game)
         if action == final_action:

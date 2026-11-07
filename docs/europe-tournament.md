@@ -16,6 +16,8 @@ For a short replay, use `--games 3 --seed 10016` with the Hoarder command. In th
 
 ## Four-player results
 
+![Pilot win-rate heatmap. Hoard and Finish wins most often against Regulars and Fast Builders and ties Fast Builder against the mixed opponents. Each cell includes its 95% interval.](figures/pilot-win-rates.png)
+
 Each cell shows outright wins out of 80 with a 95% Wilson interval for the win probability, rounded to whole percentages. The mixed table has one Adaptive, one Long-route player, and one Hoarder. Among the six policies, Hoard and Finish had the highest observed win count against Regulars and Fast Builders and tied Fast Builder at the mixed table. The intervals quantify deal-to-deal uncertainty under these policies. Several comparisons are close enough that a fresh batch could change their order.
 
 | Candidate | Three Regulars | Three Fast Builders | Mixed table |

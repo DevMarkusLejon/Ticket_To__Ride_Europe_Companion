@@ -80,6 +80,32 @@ def test_market_refresh_and_deck_exhaustion():
     assert deck.draw(hand, []) and hand == {LOCO: 2}
 
 
+def test_recorded_picks_follow_the_market_refresh_and_blind_draw():
+    deck = TrainDeck(Random(5))
+    deck.recorded_picks = []
+    deck.market = [LOCO, "blue", LOCO, "blue", "pink"]
+    deck.pile = ["green"] * 5 + [LOCO]
+    hand = Counter()
+    assert deck.draw(hand, ["blue"])
+    first, second = deck.recorded_picks
+    assert first.market == (LOCO, "blue", LOCO, "blue", "pink")
+    assert first.slot == 1 and first.card == "blue"
+    assert first.market_cleared and not second.market_cleared
+    assert second.market == ("green",) * 5
+    # The third locomotive triggered a new market. The discard now supplies the blind pick.
+    assert second.deck_available and second.slot is None
+    assert hand == Counter([first.card, second.card])
+
+    deck.recorded_picks.clear()
+    deck.market = ["red", LOCO]
+    deck.pile.clear()
+    deck.discard.clear()
+    assert deck.draw(hand, ["red"])
+    only, = deck.recorded_picks
+    assert not only.deck_available and only.slot == 0
+    assert deck.market == [LOCO]
+
+
 @pytest.mark.parametrize("seats", [2, 3, 4, 5])
 def test_double_routes(game, seats):
     state = GameState(game.state.board, player_count=seats)

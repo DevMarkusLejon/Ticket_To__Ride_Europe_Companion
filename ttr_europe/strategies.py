@@ -12,6 +12,7 @@ from .models import Route
 from .simulation import COLORS, LOCO, Game, Player, Ticket, components
 
 NAMES = ("regular", "hoarder", "finish", "fast", "long", "adaptive")
+Move = tuple[str, str | None]
 
 
 @dataclass(frozen=True)
@@ -86,9 +87,11 @@ class Bot:
         self.all_done = False
         self.failed_tunnels: dict[str, int] = {}
 
-    def claim(self, game: Game, p: Player, route: Route) -> None:
+    def claim(self, game: Game, p: Player, route: Route) -> Move:
         if not game.claim(p, route):
             self.failed_tunnels[route.route_id] = self.tunnel_budget(p, route)
+            return "tunnel_failed", route.route_id
+        return "claim", route.route_id
 
     @staticmethod
     def tunnel_budget(p: Player, route: Route) -> int:
@@ -133,10 +136,10 @@ class Bot:
             preferred.insert(0, LOCO)
         return game.deck.draw(p.hand, preferred)
 
-    def take_turn(self, game: Game, p: Player, final: bool) -> None:
+    def take_turn(self, game: Game, p: Player, final: bool) -> Move:
         self.turns += 1
         if self.turns <= self.policy.wait and not final and self.draw(game, p, []):
-            return
+            return "draw", None
         rush = self.policy.name == "adaptive" and any(
             q.hand.total() >= 14 for q in game.players if q is not p)
         pursuing = self.policy.name not in ("hoarder", "long") and not rush
@@ -145,12 +148,12 @@ class Bot:
             self.plan(game, p)
             if self.station_city and p.payment(len(p.stations) + 1):
                 game.station(p, self.station_city)
-                return
+                return "station", self.station_city
             if (self.all_done and self.policy.name in ("regular", "adaptive") and not final
                     and p.trains >= 15 and min(q.trains for q in game.players) >= 9 and game.tickets):
                 offer = game.draw_tickets()
                 game.keep_tickets(p, offer, choose_tickets(self.policy, game, p, offer, False), opening=False)
-                return
+                return "tickets", None
             targets = self.targets
 
         def affordable(r: Route) -> bool:
@@ -165,25 +168,24 @@ class Bot:
 
         playable = [r for r in targets if affordable(r)]
         if playable:
-            self.claim(game, p, max(playable, key=claim_priority))
-            return
+            return self.claim(game, p, max(playable, key=claim_priority))
         if targets and not final and self.draw(game, p, targets):
-            return
+            return "draw", None
         available = [r for r in game.state.board.routes.values()
                      if r.length <= p.trains and game.state.is_claimable(r.route_id, p.id)]
         best = max((r for r in available if affordable(r)), key=claim_priority, default=None)
         if best and (final or best.length >= min(4, p.trains) or p.hand.total() >= 12):
-            self.claim(game, p, best)
-            return
+            return self.claim(game, p, best)
         if self.draw(game, p, sorted(available, key=claim_priority, reverse=True)[:3]):
-            return
+            return "draw", None
         if best:
-            self.claim(game, p, best)
-            return
+            return self.claim(game, p, best)
         if game.tickets:
             offer = game.draw_tickets()
             game.keep_tickets(p, offer, choose_tickets(self.policy, game, p, offer, False), opening=False)
-            return
+            return "tickets", None
         if self.policy.stations and len(p.stations) < 3 and p.payment(len(p.stations) + 1):
             occupied = {city for q in game.players for city in q.stations}
             game.station(p, next(city for city in game.state.board.cities if city not in occupied))
+            return "station", p.stations[-1]
+        return "pass", None

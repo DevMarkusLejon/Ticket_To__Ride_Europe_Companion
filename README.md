@@ -2,6 +2,18 @@
 
 Python route planning and seeded strategy tournaments for classic **Ticket to Ride: Europe**.
 
+![Waiting seven more turns raised Hoard and Finish's win rate by 15.6 percentage points against Regulars, lowered it by 3.0 against Fast Builders, and had little net effect at the mixed table.](docs/figures/wait-comparison.png)
+
+Explore the [paired wait comparison](docs/europe-wait-comparison.md) or the [six-strategy pilot heatmap](docs/europe-tournament.md#four-player-results).
+
+**Watch a game:** open [the strategy replay](docs/strategy-replay.html) in a browser (download the HTML if viewing on GitHub). It starts at the first move where the 18- and 25-turn policies differ. Switch the wait to see the same deal and seat at the same move; choose **Opening deal** to watch from the start. During play the scoreboard shows track points; at the end it includes tickets, stations and the express bonus.
+
+Choose **Jump to → Next face-down draw** to inspect a blind pick. Each pick shows the face-up market before the choice, the card taken, and whether it came from the market or the deck.
+
+Each pick also shows the acting player's hand before that pick. Track claims and stations show the cards paid and the hand left over. Expand **All four hands** to see every player's colors at the current move. [Read the article and play online](https://devmarkuslejon.github.io/projects/ticket-to-ride/).
+
+The viewer includes the first matched deal at each tournament table. To watch another, run `python -m experiments.replay --deal 7 --out replay-7.html` (deal indices 0–4095). Each replay is a single file that works offline.
+
 ## Run the strategy experiment
 
 From the repository root, using Python 3.10 or newer, play 20 four-player games with a Hoarder against three Regulars.
@@ -10,9 +22,7 @@ From the repository root, using Python 3.10 or newer, play 20 four-player games 
 python -m ttr_europe.tournament --candidate hoarder --games 20 --seed 10000
 ```
 
-The [pilot results and board audit](docs/europe-tournament.md) cover six policies, alternate seats, game length, ticketless wins, and the rule assumptions.
-
-The [18-turn versus 25-turn tournament](docs/europe-wait-comparison.md) compares the two waits on 12,288 matched deals across three opponent tables.
+To rebuild both figures from the saved experiment CSVs, install Matplotlib and run `python -m experiments.plot_tournaments`. The simulations themselves use the Python standard library.
 
 ## What this implements
 

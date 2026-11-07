@@ -1,0 +1,330 @@
+<div id="europe-replay">
+  <header><span class="text-small text-muted">TICKET TO RIDE: EUROPE</span><h2>Strategy replay</h2></header>
+  <div class="viz-controls">
+    <label class="form-label">Opponent table<select class="form-select" data-ui="table"><option value="regular">Three Regulars</option><option value="fast">Three Fast Builders</option><option value="mixed">Adaptive · Long route · Hoarder</option></select></label>
+    <label class="form-label">Hoard &amp; Finish waits<select class="form-select" data-ui="wait"><option value="18">18 personal turns</option><option value="25">25 personal turns</option></select></label>
+  </div>
+  <div class="viz-row">
+    <button class="btn btn-primary" type="button" data-ui="play">Play</button>
+    <button class="btn" type="button" data-ui="prev">Back</button>
+    <button class="btn" type="button" data-ui="next">Step</button>
+    <label class="replay-jump">Jump to <select class="form-select" data-ui="jump"><option value="">Choose…</option><option value="opening">Opening deal</option><option value="split">First difference</option><option value="draw">Next card draw</option><option value="blind" data-ui="blindJump">Next face-down draw</option><option value="claim">Next track claim</option><option value="trigger">Final round</option><option value="end">Final scores</option></select></label>
+  </div>
+  <section aria-labelledby="rail-market-title" class="rail-market">
+    <h3 id="rail-market-title" data-ui="marketTitle">Train cards</h3>
+    <div class="pick-groups" data-ui="market"></div>
+    <div data-ui="payment"></div>
+  </section>
+  <details class="rail-hands"><summary data-ui="handsCaption">All four hands</summary><div class="hands-grid" data-ui="hands"></div></details>
+  <div class="replay-stage">
+    <svg class="rail-board" role="img" aria-label="Classic Europe game board. Gray tracks are unclaimed; colored tracks belong to the four players."></svg>
+    <div class="replay-notes">
+      <div class="text-small text-muted" data-ui="time"></div>
+      <h3 data-ui="action" aria-live="polite"></h3>
+      <div class="text-small" data-ui="detail"></div>
+      <table class="table table-sm"><caption data-ui="caption">Players</caption><thead><tr><th>Seat / strategy</th><th>Hand</th><th>Trains</th><th data-ui="scoreLabel">Track pts</th></tr></thead><tbody data-ui="players"></tbody></table>
+      <div><h3>Hoard &amp; Finish tickets</h3><div class="text-small" data-ui="tickets"></div></div>
+    </div>
+  </div>
+  <label class="form-label replay-slider"><span data-ui="position"></span><input class="form-range" type="range" min="0" step="1" data-ui="scrub" aria-label="Replay move"></label>
+</div>
+<style>
+#europe-replay {display:grid;gap:1em;font-variant-numeric:tabular-nums}
+#europe-replay .replay-stage {display:grid;grid-template-columns:minmax(0,1.7fr) minmax(16em,1fr);align-items:center;gap:1.15em}
+#europe-replay .replay-notes {display:grid;gap:.45em}
+#europe-replay .rail-board {display:block;width:100%;overflow:visible}
+#europe-replay .replay-jump {display:flex;align-items:center;gap:.45em;white-space:nowrap}
+#europe-replay .pick-groups {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,21em),1fr));gap:.6em 1.25em}
+#europe-replay .pick-row {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.26em;margin:.35em 0}
+#europe-replay .pick-group {min-width:0;max-width:32em}
+#europe-replay .rail-hands summary {width:fit-content;cursor:pointer}
+#europe-replay .hands-grid {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,16em),1fr));gap:.65em 1em;margin-top:.5em}
+#europe-replay .hand-line {display:flex;flex-wrap:wrap;align-items:baseline;gap:.2em .55em;margin:.3em 0}
+#europe-replay .hand-count {white-space:nowrap}
+#europe-replay .hand-count::before {content:"";display:inline-block;width:.65em;height:.65em;margin-right:.18em;background:var(--ink);border-radius:2px}
+#europe-replay .train-card {display:grid;align-content:start;justify-items:center;gap:.1em;padding:.3em .05em;border:1px solid var(--border);border-radius:.35em;min-height:3.2em}
+#europe-replay .train-card::before {content:"";width:66%;height:.45em;background:var(--ink);border-radius:.1em}
+#europe-replay [data-color="red"] {--ink:light-dark(#af372e,#f37c72)}
+#europe-replay [data-color="green"] {--ink:light-dark(#388150,#74c88c)}
+#europe-replay [data-color="pink"] {--ink:light-dark(#c9628b,#ec9cbc)}
+#europe-replay [data-color="white"] {--ink:linear-gradient(to bottom,#999,#fff 45%,#aaa)}
+#europe-replay [data-color="black"] {--ink:light-dark(#242527,#5d6267)}
+#europe-replay [data-color="yellow"] {--ink:light-dark(#d4a514,#edd067)}
+#europe-replay [data-color="blue"] {--ink:light-dark(#407ab2,#82b5e6)}
+#europe-replay [data-color="orange"] {--ink:light-dark(#d87923,#efa663)}
+#europe-replay [data-color="locomotive"] {--ink:linear-gradient(90deg,#cf6558,#e8be55,#69a87c,#5d92c6)}
+#europe-replay [data-color="deck"] {--ink:repeating-linear-gradient(125deg,var(--muted-foreground) 0 2px,transparent 2px 4px)}
+#europe-replay .taken {border-color:var(--foreground);background:color-mix(in srgb,var(--foreground) 7%,transparent)}
+#europe-replay .empty-market {grid-column:span 5;align-self:center;text-align:center;color:var(--muted-foreground)}
+#europe-replay caption {text-align:left;font-weight:500;margin:.45em 0}
+#europe-replay .replay-slider {display:grid;gap:.15em}
+#europe-replay th:first-child,#europe-replay td:first-child {text-align:left}
+#europe-replay th:not(:first-child),#europe-replay td:not(:first-child) {text-align:right}
+#europe-replay .seat-dot {display:inline-block;width:.7em;height:.7em;border-radius:50%;margin-right:.3em}
+#europe-replay .rail-label {font:500 12px system-ui,sans-serif;paint-order:stroke;stroke:var(--background);stroke-width:3.4;stroke-linejoin:round;fill:var(--foreground);pointer-events:none}
+#europe-replay .rail-board .claimed {stroke-linecap:butt}
+@container rail-replay (max-width:700px){#europe-replay .replay-stage{grid-template-columns:1fr}#europe-replay .replay-notes{gap:.3em}}
+#europe-replay {container-type:inline-size;container-name:rail-replay}
+@media(max-width:650px){#europe-replay .replay-stage{grid-template-columns:1fr}}
+</style>
+<script>
+(() => {
+  const root = document.getElementById("europe-replay");
+  const data = /*REPLAY_DATA*/null;
+  const ui = Object.fromEntries([...root.querySelectorAll("[data-ui]")].map(el => [el.dataset.ui,el]));
+  const svg = root.querySelector(".rail-board"), ns="http://www.w3.org/2000/svg";
+  const cities=data.cities, routes=data.routes;
+  // Schematic city positions follow the printed game board, not modern borders.
+  const xy={edinburgh:[100,35],london:[151,127],amsterdam:[211,128],essen:[266,129],berlin:[327,137],
+    khobenhaven:[312,73],stockholm:[376,26],petrograd:[557,37],riga:[454,50],danzic:[402,100],
+    moskva:[624,117],smolensk:[565,140],wilno:[507,125],warzawa:[437,143],kyiv:[551,177],
+    kharkov:[647,210],rostov:[639,254],sochi:[626,293],sevastopol:[579,291],
+    dieppe:[141,188],brest:[88,209],bruxelles:[199,168],paris:[174,219],frankfurt:[256,188],
+    munchen:[294,221],zurich:[246,254],venezia:[302,274],wien:[362,225],budapest:[399,240],
+    zagrab:[360,271],bucuresti:[496,291],sarajevo:[402,315],sofia:[460,323],
+    constantinople:[525,362],angora:[596,397],erzurum:[645,375],smyrna:[499,404],athina:[434,395],
+    palermo:[330,416],brindisi:[363,353],roma:[315,329],marseille:[242,315],barcelona:[142,372],
+    pamplona:[131,318],madrid:[80,350],cadiz:[70,402],lisboa:[30,379]};
+  const names={regular:"Regular",finish:"Hoard & Finish",fast:"Fast Builder",long:"Long route",adaptive:"Adaptive",hoarder:"Hoarder"};
+  const seatColor=i=>"var(--viz-series-"+(i+1)+")";
+  const seatName=(g,i)=>"P"+(i+1)+" · "+names[g.policies[i]];
+  const hubs=["edinburgh","madrid","paris","stockholm","petrograd","moskva","berlin","wien","roma","constantinople"];
+  const useSVG=(tag,attrs,parent=svg)=>{
+    const el=document.createElementNS(ns,tag);
+    for(const [k,v] of Object.entries(attrs))el.setAttribute(k,v);
+    parent.append(el);return el;
+  };
+  const text=(tag,value,parent)=>{const e=document.createElement(tag);e.textContent=value;parent.append(e);return e};
+  let table="regular", wait="18", step=0, timer=null, frames=[], g, split;
+  let drawMoves=[], blindMoves=[];
+  const paths={}, nodes={}, labels={}, stationMarks={};
+  const ringLayer=useSVG("g",{}), trackLayer=useSVG("g",{}), highlightLayer=useSVG("g",{}), cityLayer=useSVG("g",{}), labelLayer=useSVG("g",{});
+  const glow=useSVG("path",{fill:"none",stroke:"var(--foreground)","stroke-width":8,"stroke-opacity":.22,"stroke-linecap":"round"},ringLayer);
+  const groups={};
+  for(const [id,r] of Object.entries(routes))(groups[[r.a,r.b].sort().join(":")]??=[]).push(id);
+  const bends={"palermo:smyrna":48,"petrograd:stockholm":-23,"brest:pamplona":25,"berlin:wien":-15};
+  for(const [key,ids] of Object.entries(groups))for(const [j,id] of ids.entries()){
+    const r=routes[id], [a,b]=key.split(":"), [x,y]=xy[a], [u,v]=xy[b];
+    const dx=u-x,dy=v-y,len=Math.hypot(dx,dy), bend=(bends[key]||0)+(ids.length===2?(j?7:-7):0);
+    const d="M"+x+","+y+" Q"+((x+u)/2-dy/len*bend)+","+((y+v)/2+dx/len*bend)+" "+u+","+v;
+    const p=useSVG("path",{d,fill:"none",pathLength:r.length},trackLayer);
+    p.dataset.label=cities[r.a]+" – "+cities[r.b]+" · "+r.length+" "+r.color+(r.tunnel?" · tunnel":"")+(r.ferry?" · ferry":"");
+    useSVG("title",{},p);
+    paths[id]=p;
+  }
+  for(const [id,[x,y]] of Object.entries(xy)){
+    const n=useSVG("circle",{cx:x,cy:y,r:2.5,fill:"var(--background)",stroke:"var(--muted-foreground)","stroke-width":1},cityLayer);
+    useSVG("title",{},n).textContent=cities[id];nodes[id]=n;
+    stationMarks[id]=useSVG("rect",{x:x-4,y:y-4,width:8,height:8,display:"none"},cityLayer);
+    labels[id]=useSVG("text",{x:x>585?x-4:x+4,y:y-6,"text-anchor":x>585?"end":"start",class:"rail-label"},labelLayer);
+    labels[id].textContent=cities[id];
+  }
+  function buildFrames(game){
+    const people=game.initial.map((ts,seat)=>({cards:4,hand:game.opening_hands[seat],trains:45,points:0,ts:[...ts]}));
+    const owners={},stations={};let done=[];
+    const frame=()=>({people:people.map(p=>({...p,ts:[...p.ts]})),owners:{...owners},stations:{...stations},done:[...done]});
+    const result=[frame()];
+    game.events.forEach((e,k)=>{
+      const i=k%people.length,p=people[i];p.cards=e.hand;p.hand=e.hand_after;
+      if(e.kind==="claim"){const r=routes[e.target];owners[e.target]=i;p.trains-=r.length;p.points+=r.points}
+      if(e.kind==="station")stations[e.target]=i;
+      if(e.kind==="tickets")p.ts.push(e.kept);
+      if(e.done)done=e.done;
+      result.push(frame());
+    });
+    return result;
+  }
+  function opened(at){
+    const pair=data.tables[table];g=pair[wait];frames=buildFrames(g);
+    const other=pair[wait==="18"?"25":"18"].events;
+    const first=g.events.findIndex((e,i)=>JSON.stringify(e)!==JSON.stringify(other[i]));
+    split=first<0?Math.min(other.length,g.events.length):first+1;
+    drawMoves=[];blindMoves=[];
+    g.events.forEach((event,index)=>{
+      if(!event.picks)return;
+      drawMoves.push(index+1);
+      if(event.picks.some(pick=>pick.slot===null))blindMoves.push(index+1);
+    });
+    ui.blindJump.disabled=!blindMoves.length;
+    ui.blindJump.textContent=blindMoves.length?"Next face-down draw":"No face-down draws this game";
+    step=Math.min(at??split,g.events.length);ui.scrub.max=g.events.length;render();
+  }
+  function eventText(e,i){
+    if(!e)return ["Opening deal","Four train cards per player. Starting tickets have been chosen."];
+    const who=seatName(g,i), r=routes[e.target];
+    if(e.kind==="claim"||e.kind==="tunnel_failed"){
+      const where=cities[r.a]+" – "+cities[r.b];
+      if(e.kind==="tunnel_failed")return [who+" attempted a tunnel",where+" · extra payment not made; no track claimed."];
+      return [who+" claimed a track",where+" · "+r.length+" train"+(r.length===1?"":"s")+(r.tunnel?" · tunnel":"")+(r.ferry?" · ferry":"")+" · +"+r.points+" track points."];
+    }
+    if(e.kind==="station")return [who+" built a station",cities[e.target]+" · may borrow one adjacent opponent track for tickets."];
+    if(e.kind==="tickets"){const [a,b,pts]=data.tickets[e.kept];return [who+" kept a new ticket",cities[a]+" – "+cities[b]+" · "+pts+" points."]}
+    if(e.kind==="draw")return [who+" drew "+e.picks.length+" card"+(e.picks.length===1?"":"s"),e.hand+" train cards now in hand."];
+    return [who+" passed","No playable action."];
+  }
+  function cardTile(row,color,label,status){
+    const tile=document.createElement("div");
+    tile.className="train-card text-small";
+    tile.dataset.color=color;
+    text("span",label,tile);
+    if(status)text("span",status,tile);
+    if(status==="✓ Taken")tile.classList.add("taken");
+    row.append(tile);
+  }
+  function showChoices(supply,pickNumber){
+    const isPick=pickNumber>0;
+    const group=document.createElement("div");
+    group.className="pick-group";
+    if(isPick){
+      const source=supply.slot===null?" from the face-down deck":" face up";
+      text("div","Pick "+pickNumber+" · "+supply.card+source,group);
+    }
+    const row=document.createElement("div");
+    row.className="pick-row";
+    group.append(row);
+    if(supply.market.length){
+      for(let slot=0;slot<5;slot++){
+        const color=supply.market[slot];
+        let label=color?color[0].toUpperCase()+color.slice(1):"Empty";
+        if(color==="locomotive")label="Loco";
+        let status="";
+        if(pickNumber===2 && color==="locomotive")status="Locked";
+        if(isPick && slot===supply.slot)status="✓ Taken";
+        cardTile(row,color||"empty",label,status);
+      }
+    }else{
+      text("span","No face-up cards",row).className="empty-market text-small";
+    }
+    const tookDeck=isPick && supply.slot===null;
+    cardTile(row,"deck","Deck",supply.deck_available?(tookDeck?"✓ Taken":"Blind"):"Empty");
+    ui.market.append(group);
+    return group;
+  }
+  const cardColors=["red","orange","yellow","green","blue","pink","black","white","locomotive"];
+  function showHand(parent,label,hand){
+    const line=document.createElement("div");
+    line.className="hand-line text-small";
+    text("strong",label,line);
+    const held=cardColors.filter(color=>hand[color]>0);
+    for(const color of held){
+      const chip=text("span",hand[color]+" × "+color,line);
+      chip.className="hand-count";
+      chip.dataset.color=color;
+    }
+    if(!held.length)text("span","No cards",line);
+    parent.append(line);
+  }
+  function renderMarket(event,actor){
+    ui.market.replaceChildren();
+    ui.payment.replaceChildren();
+    const beforeHand=step?frames[step-1].people[actor].hand:{};
+    if(!event?.picks){
+      const ending=step===g.events.length;
+      ui.marketTitle.textContent=ending?"Train cards at game end":step?"Train cards before this move":"Opening train cards";
+      const before=g.events[step-2]?.supply??g.opening_supply;
+      showChoices(ending?event.supply:before,0);
+      if(event?.spent){
+        const route=routes[event.target];
+        const place=route?cities[route.a]+" – "+cities[route.b]:cities[event.target];
+        text("h3",seatName(g,actor)+" · "+place,ui.payment);
+        showHand(ui.payment,"Before the move",beforeHand);
+        showHand(ui.payment,"Spent",event.spent);
+        const count=Object.values(event.spent).reduce((total,n)=>total+n,0);
+        if(event.kind==="claim" && route.tunnel && count>route.length)
+          text("div","Includes "+(count-route.length)+" extra for the tunnel.",ui.payment).className="text-small";
+        showHand(ui.payment,"Remaining",event.hand_after);
+      }
+      return;
+    }
+    ui.marketTitle.textContent=seatName(g,actor)+" · Train card choices";
+    const holding={...beforeHand};
+    event.picks.forEach((pick,index)=>{
+      const group=showChoices(pick,index+1);
+      showHand(group,"Hand before pick "+(index+1),holding);
+      holding[pick.card]=(holding[pick.card]||0)+1;
+      if(pick.market_cleared)
+        text("div","Three face-up locomotives cleared the market.",group).className="text-small";
+      if(pick.slot!==null && pick.card==="locomotive")
+        text("div","Taking a face-up locomotive ends the draw.",group).className="text-small";
+      else if(index===1 && pick.market.includes("locomotive"))
+        text("div","Face-up locomotives can only be taken on the first pick.",group).className="text-small";
+      else if(event.picks.length===1)
+        text("div","No legal second pick remained.",group).className="text-small";
+    });
+  }
+  function render(){
+    const f=frames[step], e=g.events[step-1], i=(step-1)%g.policies.length, end=step===g.events.length;
+    const small=svg.getBoundingClientRect().width<500;
+    svg.setAttribute("viewBox","5 7 664 433");
+    const [headline,detail]=eventText(e,i);
+    renderMarket(e,i);
+    ui.handsCaption.textContent=step?"All four hands after move "+step:"All four opening hands";
+    ui.hands.replaceChildren();
+    f.people.forEach((person,seat)=>showHand(ui.hands,seatName(g,seat),person.hand));
+    ui.time.textContent="Seed "+g.seed+"  ·  "+(step?"Round "+Math.ceil(step/4):"Setup")+
+      (step===g.trigger?"  ·  Final round triggered":step>g.trigger?"  ·  Final round":step===split?"  ·  First difference":"");
+    ui.action.textContent=end?(g.winners.length===1?"Winner: ":"Shared first: ")+g.winners.map(s=>seatName(g,s)).join(" / "):headline;
+    ui.detail.textContent=end?"Last move: "+headline+". "+detail:detail;
+    ui.position.textContent="Move "+step+" of "+g.events.length;
+    ui.scrub.value=step;ui.prev.disabled=!step;ui.next.disabled=end;
+    ui.play.textContent=timer!==null?"Pause":end?"Replay":"Play";
+    const current=routes[e?.target];glow.setAttribute("d",current?paths[e.target].getAttribute("d"):"");
+    for(const [rid,p] of Object.entries(paths)){
+      const owner=f.owners[rid],taken=owner!==undefined;
+      p.setAttribute("stroke",taken?seatColor(owner):"var(--muted-foreground)");
+      p.setAttribute("stroke-width",taken?4.4:1.45);p.setAttribute("stroke-opacity",taken?1:.46);
+      p.setAttribute("stroke-dasharray",taken?".88 .12":"none");p.setAttribute("stroke-dashoffset",taken?"-.06":"0");
+      p.firstChild.textContent=p.dataset.label+(taken?" · "+seatName(g,owner):" · unclaimed");
+      p.setAttribute("class",taken?"claimed":"");
+      (taken?highlightLayer:trackLayer).append(p);
+    }
+    const focus=new Set(current?[current.a,current.b]:e?.kind==="station"?[e.target]:[]);
+    const width=svg.getBoundingClientRect().width||650;
+    for(const [id,el] of Object.entries(labels)){
+      const active=focus.has(id),owner=f.stations[id],mark=stationMarks[id];
+      mark.setAttribute("display",owner===undefined?"none":"inline");if(owner!==undefined)mark.setAttribute("fill",seatColor(owner));
+      nodes[id].setAttribute("r",active?4:2.5);
+      el.style.display=active||(!small&&hubs.includes(id))||(small&&["madrid","stockholm","moskva"].includes(id))?"":"none";
+      el.style.fontSize=Math.max(11,11*664/width)+"px";
+    }
+    ui.players.replaceChildren();
+    f.people.forEach((p,s)=>{
+      const row=document.createElement("tr"),cell=document.createElement("td"),dot=document.createElement("span");
+      dot.className="seat-dot";dot.style.background=seatColor(s);cell.append(dot,"P"+(s+1)+" "+names[g.policies[s]]);
+      row.append(cell);for(const n of [p.cards,p.trains,end?g.scores[s].points:p.points])text("td",n,row);
+      ui.players.append(row);
+    });
+    ui.caption.textContent=end?"Final standings by seat":"Players";ui.scoreLabel.textContent=end?"Final pts":"Track pts";
+    ui.tickets.replaceChildren();
+    for(const t of f.people[g.seat].ts){const [a,b,pts]=data.tickets[t],done=f.done.includes(t);
+      text("div",(done?"✓ ":end?"✕ ":"○ ")+cities[a]+" – "+cities[b]+" · "+(done?"+":end?"−":"")+pts+(done?" · complete":end?" · missed":" · open"),ui.tickets);}
+  }
+  function stop(){if(timer!==null)clearInterval(timer);timer=null}
+  function save(){window.openai?.setWidgetState?.({modelContent:{table,wait,move:step}})?.catch(()=>{})}
+  function seek(n){stop();step=Math.max(0,Math.min(n,g.events.length));render();save()}
+  ui.table.onchange=()=>{stop();table=ui.table.value;opened();save()};
+  ui.wait.onchange=()=>{stop();wait=ui.wait.value;opened(step);save()};
+  ui.prev.onclick=()=>seek(step-1);ui.next.onclick=()=>seek(step+1);ui.scrub.oninput=()=>seek(+ui.scrub.value);
+  ui.jump.onchange=()=>{const v=ui.jump.value;ui.jump.value="";
+    if(v==="draw"||v==="blind"){
+      const moves=v==="draw"?drawMoves:blindMoves;
+      if(moves.length)seek(moves.find(move=>move>step)??moves[0]);
+      return;
+    }
+    const next=g.events.findIndex((e,k)=>k>=step&&e.kind==="claim");
+    seek(({opening:0,split,trigger:g.trigger,end:g.events.length,claim:next<0?g.events.length:next+1})[v]??step)};
+  ui.play.onclick=()=>{
+    if(timer!==null){seek(step);return}if(step===g.events.length)step=0;
+    timer=setInterval(()=>{step++;if(step===g.events.length){stop();save()}render()},560);render();
+  };
+  function restore(state){
+    const s=state?.modelContent;
+    if(s && Object.hasOwn(data.tables,s.table) && ["18","25"].includes(s.wait)&&Number.isInteger(s.move)&&s.move>=0){
+      stop();ui.table.value=table=s.table;ui.wait.value=wait=s.wait;opened(s.move);
+    }else opened();
+  }
+  restore(window.openai?.widgetState);
+  window.addEventListener("openai:set_globals",ev=>{if(ev.detail?.globals?.widgetState)restore(ev.detail.globals.widgetState)});
+  new ResizeObserver(()=>render()).observe(svg);
+})();
+</script>

@@ -36,6 +36,15 @@ def load_europe() -> tuple[BoardGraph, list[Ticket]]:
     return board, tickets
 
 
+@dataclass(frozen=True)
+class CardPick:
+    market: tuple[str, ...]
+    deck_available: bool
+    slot: int | None  # None for a face-down draw.
+    card: str
+    market_cleared: bool
+
+
 class TrainDeck:
     def __init__(self, rng: Random):
         self.rng = rng
@@ -43,6 +52,7 @@ class TrainDeck:
         self.rng.shuffle(self.pile)
         self.discard: list[str] = []
         self.market: list[str] = []
+        self.recorded_picks: list[CardPick] | None = None
 
     def take(self, count: int) -> list[str]:
         cards = []
@@ -55,34 +65,46 @@ class TrainDeck:
             cards.append(self.pile.pop())
         return cards
 
-    def fill_market(self) -> None:
+    def fill_market(self) -> bool:
+        """Refill the display and report whether three locomotives cleared it."""
+        cleared = False
         self.market.extend(self.take(5 - len(self.market)))
         while self.market.count(LOCO) >= 3:
+            cleared = True
             self.discard.extend(self.market)
             self.market.clear()
             # Hoarding can make a legal five-card display mathematically impossible.
             available = self.pile + self.discard
             if sum(c != LOCO for c in available) < min(5, len(available)) - 2:
-                return
+                break
             self.market.extend(self.take(5))
+        return cleared
 
     def draw(self, hand: Counter[str], preference: list[str]) -> bool:
         for draw_number in range(2):
+            deck_available = bool(self.pile or self.discard)
             visible = [c for c in self.market if draw_number == 0 or c != LOCO]
             card = next((c for c in preference if c in visible), None)
-            if card is None and not (self.pile or self.discard) and visible:
+            if card is None and not deck_available and visible:
                 card = visible[0]
+            slot = None
             if card is None:
                 blind = self.take(1)
                 if not blind:
                     return draw_number > 0
-                hand[blind[0]] += 1
+                card = blind[0]
             else:
-                self.market.remove(card)
-                hand[card] += 1
-                self.fill_market()
-                if card == LOCO:
-                    break
+                slot = self.market.index(card)
+            market_before = tuple(self.market) if self.recorded_picks is not None else ()
+            market_cleared = False
+            hand[card] += 1
+            if slot is not None:
+                self.market.pop(slot)
+                market_cleared = self.fill_market()
+            if self.recorded_picks is not None:
+                self.recorded_picks.append(CardPick(market_before, deck_available, slot, card, market_cleared))
+            if slot is not None and card == LOCO:
+                break
         return True
 
 

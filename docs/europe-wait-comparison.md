@@ -2,6 +2,8 @@
 
 For the simulated Hoard and Finish player, **25 turns won more often against three Regulars, 18 won more often against three Fast Builders, and the mixed table showed no clear advantage**. Each comparison used 4,096 fresh deals played twice, for 24,576 four-player games. The candidate kept the same two opening tickets and played from the same seat in each pair.
 
+![Win rates for 18 and 25 turns, with paired differences and simultaneous 95% intervals. The mixed-table interval spans zero. Exact values follow.](figures/wait-comparison.png)
+
 | Opponents | 18-turn outright wins | 25-turn outright wins | Difference, 25 minus 18 | Simultaneous 95% interval |
 |---|---:|---:|---:|---:|
 | Three Regulars | 1,533 (37.4%) | 2,170 (53.0%) | +15.6 pp | +13.2 to +17.9 pp |
