@@ -12,6 +12,8 @@ Choose **Jump to → Next face-down draw** to inspect a blind pick. Each pick sh
 
 Each pick shows the acting player's hand before that pick. Track claims and stations show the cards paid and the hand left over. The board follows the acting player's destination tickets. Select a ticket to isolate its two cities, or use **Tickets on map** to follow a particular player. Expand **All four hands and tickets** to inspect the whole table. [Read the article and play online](https://devmarkuslejon.github.io/projects/ticket-to-ride/).
 
+Dotted tracks show the ticket paths the selected player used at their last decision. Choose **Jump to → Next blocked plan** to pin an affected ticket. The × marks the exact track another player took. **See their next decision** advances to the affected player's turn, when the bot can choose another route. Players pursuing long tracks or taking their opening draws have no active ticket route.
+
 The viewer includes the first matched deal at each tournament table. To watch another, run `python -m experiments.replay --deal 7 --out replay-7.html` (deal indices 0–4095). Each replay is a single file that works offline.
 
 ## Run the strategy experiment

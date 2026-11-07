@@ -20,6 +20,7 @@ def record(board, tickets, opponents, seed, seat, wait):
     replay = {"seed": seed, "seat": seat, "policies": [p.name for p in lineup], "events": []}
     previous_done = [[] for _ in lineup]
     hands = []
+    last_plans = [None] * len(lineup)
 
     def observe(game, turn, move):
         nonlocal previous_done
@@ -56,7 +57,19 @@ def record(board, tickets, opponents, seed, seat, wait):
                 event["completed_by_seat"] = previous_done = done
         replay["events"].append(event)
 
-    result = play(board, tickets, lineup, seed, observe=observe)
+    def observe_decision(turn, bot):
+        actor = (turn - 1) % len(lineup)
+        plan = {"mode": bot.plan_mode}
+        if bot.plan_mode == "tickets":
+            plan["paths"] = {tickets.index(ticket): [r.route_id for r in path]
+                             for ticket, path in bot.ticket_paths.items()}
+            plan["borrowed"] = [r.route_id for r in bot.borrowed]
+            plan["station"] = bot.station_city
+        if plan != last_plans[actor]:
+            replay["events"][-1]["plan"] = plan
+            last_plans[actor] = plan
+
+    result = play(board, tickets, lineup, seed, observe=observe, observe_decision=observe_decision)
     replay["trigger"] = result.actions - len(lineup)
     replay["scores"] = [asdict(s) for s in result.scores]
     top = max(s.rank() for s in result.scores)

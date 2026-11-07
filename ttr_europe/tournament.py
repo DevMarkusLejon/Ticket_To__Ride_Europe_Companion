@@ -27,7 +27,8 @@ class PlayedGame:
 
 def play(board: BoardGraph, tickets: list[Ticket], policies: list[Policy], seed: int,
          checkpoint_at: int | None = None, *,
-         observe: Callable[[Game, int, Move], None] | None = None) -> PlayedGame:
+         observe: Callable[[Game, int, Move], None] | None = None,
+         observe_decision: Callable[[int, Bot], None] | None = None) -> PlayedGame:
     game = Game(board, tickets, len(policies), seed)
     bots = [Bot(policy) for policy in policies]
     for p, policy, offer in zip(game.players, policies, game.opening_offers):
@@ -43,6 +44,8 @@ def play(board: BoardGraph, tickets: list[Ticket], policies: list[Policy], seed:
         move = bots[seat].take_turn(game, player, final_action is not None)
         if observe:
             observe(game, action, move)
+        if observe_decision:
+            observe_decision(action, bots[seat])
         if action == checkpoint_at:
             checkpoint = scores(game)
         if action == final_action:

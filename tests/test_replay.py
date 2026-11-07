@@ -42,3 +42,42 @@ def test_replay_matches_published_pairs_from_a_rotated_seat():
                 assert all(set(done) <= held for done, held in zip(completed, kept, strict=True))
             assert [len(done) for done in completed] == [s["completed"] for s in game["scores"]]
             assert len(completed[seat]) == int(row[f"completed_{wait}"])
+
+
+def test_ticket_plans_use_tracks_available_before_the_move():
+    data = make_data(0)
+    for pair in data["tables"].values():
+        for game in pair.values():
+            plans = [{} for _ in game["initial"]]
+            held = [set(tickets) for tickets in game["initial"]]
+            owners = {}
+            for index, event in enumerate(game["events"]):
+                seat = index % 4
+                if "plan" in event:
+                    plans[seat] = event["plan"]
+                plan = plans[seat]
+                if game["policies"][seat] in ("hoarder", "long"):
+                    assert plan["mode"] in ("waiting", "long_routes")
+                for ticket, path in plan.get("paths", {}).items():
+                    assert ticket in held[seat]
+                    city, destination, _ = data["tickets"][ticket]
+                    for track in path:
+                        route = data["routes"][track]
+                        assert city in (route["a"], route["b"])
+                        assert track not in owners or owners[track] == seat or track in plan["borrowed"]
+                        city = route["b"] if city == route["a"] else route["a"]
+                    assert city == destination
+                if event["kind"] == "claim":
+                    owners[event["target"]] = seat
+                if event["kind"] == "tickets":
+                    held[seat].add(event["kept"])
+
+    # P3's last decision still uses the coastal track when P1 takes it on move 141.
+    events = data["tables"]["regular"][25]["events"]
+    blocked = events[140]
+    assert blocked["kind"] == "claim" and blocked["target"] == "marseille_barcelona"
+    previous = next(e["plan"] for e in reversed(events[2:140:4]) if "plan" in e)
+    assert previous["paths"][27][0] == blocked["target"]
+    assert events[142]["plan"]["paths"][27][:3] == [
+        "pamplona_barcelona", "paris_pamplona_2", "paris_marseille",
+    ]

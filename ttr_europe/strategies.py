@@ -31,7 +31,8 @@ class Policy:
 
 
 def path_to_ticket(game: Game, player: Player, ticket: Ticket,
-                   borrowed: tuple[Route, ...] = (), planned: tuple[Route, ...] = ()) -> list[Route] | None:
+                   borrowed: tuple[Route, ...] = (), planned: tuple[Route, ...] = (), *,
+                   include_claimed: bool = False) -> list[Route] | None:
     state = game.state
     if borrowed:
         owners = dict(state.route_owner)
@@ -50,7 +51,7 @@ def path_to_ticket(game: Game, player: Player, ticket: Ticket,
         path, _ = shortest_path(state, ticket.source_city, ticket.target_city, player.id, cost)
     except ValueError:
         return None
-    return [state.board.routes[r] for r in path if r not in state.route_owner]
+    return [state.board.routes[r] for r in path if include_claimed or r not in state.route_owner]
 
 
 def choose_tickets(policy: Policy, game: Game, player: Player, offer: list[Ticket],
@@ -83,6 +84,9 @@ class Bot:
         self.turns = 0
         self.plan_key = None
         self.targets: list[Route] = []
+        self.ticket_paths: dict[Ticket, list[Route]] = {}
+        self.borrowed: tuple[Route, ...] = ()
+        self.plan_mode = "opening"
         self.station_city: str | None = None
         self.all_done = False
         self.failed_tunnels: dict[str, int] = {}
@@ -104,6 +108,7 @@ class Bot:
             return
         self.plan_key = key
         done, borrowed = game.ticket_result(p)
+        self.borrowed = borrowed
         pending = [t for t in p.tickets if t not in done]
         self.all_done = not pending
         self.station_city = None
@@ -121,10 +126,15 @@ class Bot:
                         self.station_city = city
                         break
         self.targets = []
+        self.ticket_paths = {}
         for ticket in sorted(pending, key=lambda t: -t.points):
-            path = path_to_ticket(game, p, ticket, borrowed, tuple(self.targets))
-            if path and sum(r.length for r in path) <= p.trains:
-                self.targets.extend(r for r in path if r not in self.targets)
+            path = path_to_ticket(game, p, ticket, borrowed, tuple(self.targets), include_claimed=True)
+            if path is None:
+                continue
+            missing = [r for r in path if r.route_id not in game.state.route_owner]
+            if missing and sum(r.length for r in missing) <= p.trains:
+                self.ticket_paths[ticket] = path
+                self.targets.extend(r for r in missing if r not in self.targets)
 
     def draw(self, game: Game, p: Player, targets: list[Route]) -> bool:
         colors = sorted(COLORS, key=lambda c: (-int(p.hand[c] < 8), -p.hand[c]))
@@ -139,12 +149,15 @@ class Bot:
     def take_turn(self, game: Game, p: Player, final: bool) -> Move:
         self.turns += 1
         if self.turns <= self.policy.wait and not final and self.draw(game, p, []):
+            self.plan_mode = "waiting"
             return "draw", None
         rush = self.policy.name == "adaptive" and any(
             q.hand.total() >= 14 for q in game.players if q is not p)
         pursuing = self.policy.name not in ("hoarder", "long") and not rush
         targets = []
+        self.plan_mode = "rush" if rush else "long_routes"
         if pursuing:
+            self.plan_mode = "tickets"
             self.plan(game, p)
             if self.station_city and p.payment(len(p.stations) + 1):
                 game.station(p, self.station_city)

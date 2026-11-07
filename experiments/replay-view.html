@@ -8,7 +8,7 @@
     <button class="btn btn-primary" type="button" data-ui="play">Play</button>
     <button class="btn" type="button" data-ui="prev">Back</button>
     <button class="btn" type="button" data-ui="next">Step</button>
-    <label class="replay-jump">Jump to <select class="form-select" data-ui="jump"><option value="">Choose…</option><option value="opening">Opening deal</option><option value="split">First difference</option><option value="draw">Next card draw</option><option value="blind" data-ui="blindJump">Next face-down draw</option><option value="claim">Next track claim</option><option value="trigger">Final round</option><option value="end">Final scores</option></select></label>
+    <label class="replay-jump">Jump to <select class="form-select" data-ui="jump"><option value="">Choose…</option><option value="opening">Opening deal</option><option value="split">First difference</option><option value="block" data-ui="blockJump">Next blocked plan</option><option value="draw">Next card draw</option><option value="blind" data-ui="blindJump">Next face-down draw</option><option value="claim">Next track claim</option><option value="trigger">Final round</option><option value="end">Final scores</option></select></label>
   </div>
   <section aria-labelledby="rail-market-title" class="rail-market">
     <h3 id="rail-market-title" data-ui="marketTitle">Train cards</h3>
@@ -17,12 +17,14 @@
   </section>
   <details class="rail-hands"><summary data-ui="handsCaption">All four hands and tickets</summary><div class="hands-grid" data-ui="hands"></div></details>
   <div class="replay-stage">
-    <div>
+    <div id="ticket-map">
       <label class="replay-jump">Tickets on map <select class="form-select" data-ui="ticketSeat"><option value="turn">Follow turn</option></select></label>
       <svg class="rail-board" role="img" aria-label="Classic Europe board with ticket endpoints."></svg>
       <h3 data-ui="ticketTitle"></h3>
-      <div class="text-small ticket-key"><span class="ring-key"></span>Unfinished <span class="ring-key finished"></span>Complete · Select a ticket to isolate its cities.</div>
+      <div class="text-small ticket-key"><span class="ring-key"></span> Unfinished <span class="ring-key finished"></span> Complete <span class="plan-key"></span> Last planned route · × Blocked track</div>
       <div class="ticket-list" data-ui="tickets"></div>
+      <div class="plan-detail" data-ui="planDetail"></div>
+      <div data-ui="blocks"></div>
     </div>
     <div class="replay-notes">
       <div class="text-small text-muted" data-ui="time"></div>
@@ -42,6 +44,9 @@
 #europe-replay .ticket-key {margin-top:.25em}
 #europe-replay .ring-key {display:inline-block;width:.75em;height:.75em;border:2px solid currentColor;border-radius:50%}
 #europe-replay .ring-key.finished {border-style:dashed;margin-left:.4em}
+#europe-replay .plan-key {display:inline-block;width:1.5em;border-top:3px dotted currentColor;vertical-align:middle;margin-left:.4em}
+#europe-replay .plan-detail,#europe-replay [data-ui="blocks"]:not(:empty) {margin-top:.5em}
+#europe-replay [data-ui="blocks"] .btn {margin:.25em .4em .25em 0}
 #europe-replay .ticket-list [aria-pressed="true"] {font-weight:bold;text-decoration:underline}
 #europe-replay .replay-jump {display:flex;align-items:center;gap:.45em;white-space:nowrap}
 #europe-replay .pick-groups {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,21em),1fr));gap:.6em 1.25em}
@@ -107,9 +112,10 @@
   const text=(tag,value,parent)=>{const e=document.createElement(tag);e.textContent=value;parent.append(e);return e};
   let table="regular", wait="18", step=0, timer=null, frames=[], g, split;
   let selectedTicket=null, lastTicketSeat=null;
-  let drawMoves=[], blindMoves=[];
+  let drawMoves=[], blindMoves=[], blocks=[];
   const paths={}, nodes={}, labels={}, stationMarks={}, ticketRings={};
-  const ringLayer=useSVG("g",{}), trackLayer=useSVG("g",{}), highlightLayer=useSVG("g",{}), cityLayer=useSVG("g",{}), labelLayer=useSVG("g",{});
+  const ringLayer=useSVG("g",{}), trackLayer=useSVG("g",{}), highlightLayer=useSVG("g",{});
+  const planLayer=useSVG("g",{"pointer-events":"none","aria-hidden":"true"}), cityLayer=useSVG("g",{}), labelLayer=useSVG("g",{});
   const glow=useSVG("path",{fill:"none",stroke:"var(--foreground)","stroke-width":8,"stroke-opacity":.22,"stroke-linecap":"round"},ringLayer);
   const groups={};
   for(const [id,r] of Object.entries(routes))(groups[[r.a,r.b].sort().join(":")]??=[]).push(id);
@@ -132,13 +138,28 @@
     labels[id].textContent=cities[id];
   }
   function buildFrames(game){
-    const people=game.initial.map((ts,seat)=>({cards:4,hand:game.opening_hands[seat],trains:45,points:0,ts:[...ts],completed:[]}));
+    blocks=[];
+    const people=game.initial.map((ts,seat)=>({cards:4,hand:game.opening_hands[seat],trains:45,points:0,ts:[...ts],completed:[],plan:{mode:"opening"}}));
     const owners={},stations={};
     const frame=()=>({people:people.map(p=>({...p,ts:[...p.ts]})),owners:{...owners},stations:{...stations}});
     const result=[frame()];
     game.events.forEach((e,k)=>{
       const i=k%people.length,p=people[i];p.cards=e.hand;p.hand=e.hand_after;
-      if(e.kind==="claim"){const r=routes[e.target];owners[e.target]=i;p.trains-=r.length;p.points+=r.points}
+      if(e.kind==="claim"){
+        people.forEach((other,seat)=>{
+          if(seat===i)return;
+          for(const [id,path] of Object.entries(other.plan.paths??{})){
+            const ticket=Number(id);
+            if(!other.completed.includes(ticket) && path.includes(e.target)){
+              const next=k+1+(seat-i+people.length)%people.length;
+              blocks.push({move:k+1,next:next<=game.events.length?next:null,actor:i,seat,ticket,route:e.target,path});
+            }
+          }
+        });
+        const r=routes[e.target];owners[e.target]=i;p.trains-=r.length;p.points+=r.points;
+      }
+      if(e.plan)p.plan=e.plan;
+      p.decision=k+1;
       if(e.kind==="station")stations[e.target]=i;
       if(e.kind==="tickets")p.ts.push(e.kept);
       if(e.completed_by_seat)people.forEach((person,seat)=>{person.completed=e.completed_by_seat[seat]});
@@ -152,7 +173,8 @@
     ui.ticketSeat.value=[...ui.ticketSeat.options].some(o=>o.value===view)?view:"turn";
     selectedTicket=ticket;lastTicketSeat=null;
     const other=pair[wait==="18"?"25":"18"].events;
-    const first=g.events.findIndex((e,i)=>JSON.stringify(e)!==JSON.stringify(other[i]));
+    const actionJSON=e=>JSON.stringify(e,(key,value)=>key==="plan"?undefined:value);
+    const first=g.events.findIndex((e,i)=>actionJSON(e)!==actionJSON(other[i]));
     split=first<0?Math.min(other.length,g.events.length):first+1;
     drawMoves=[];blindMoves=[];
     g.events.forEach((event,index)=>{
@@ -162,6 +184,8 @@
     });
     ui.blindJump.disabled=!blindMoves.length;
     ui.blindJump.textContent=blindMoves.length?"Next face-down draw":"No face-down draws this game";
+    ui.blockJump.disabled=!blocks.length;
+    ui.blockJump.textContent=blocks.length?"Next blocked plan":"No blocked plans this game";
     step=Math.min(at??split,g.events.length);ui.scrub.max=g.events.length;render();
   }
   function eventText(e,i){
@@ -307,6 +331,88 @@
     svg.setAttribute("aria-label","Europe board. Ticket endpoints for "+seatName(g,seat)+": "+[...endpoints.keys()].map(id=>cities[id]).join(", ")+".");
     return endpoints;
   }
+  function itinerary(ticket,path){
+    let city=data.tickets[ticket][0];
+    const stops=[cities[city]];
+    for(const id of path){
+      const r=routes[id];city=r.a===city?r.b:r.a;stops.push(cities[city]);
+    }
+    return stops.join(" → ");
+  }
+  function showPlans(f,seat,labelCities){
+    const person=f.people[seat], plan=person.plan;
+    const tickets=selectedTicket===null?person.ts:[selectedTicket];
+    const segments=new Set();
+    ui.planDetail.replaceChildren();planLayer.replaceChildren();
+    if(plan.mode==="tickets"){
+      text("strong","Plan at move "+person.decision,ui.planDetail);
+      const decision=g.events[person.decision-1];
+      for(const id of tickets){
+        const path=plan.paths[id];
+        const label=path?itinerary(id,path):person.completed.includes(id)?"Ticket connected":
+          decision.kept===id?"New ticket · awaiting next decision":"No feasible route chosen";
+        text("div",(person.ts.indexOf(id)+1)+". "+label,ui.planDetail);
+        for(const rid of path??[])segments.add(rid);
+      }
+      if(plan.station)text("div","Station considered in "+cities[plan.station],ui.planDetail);
+    }else{
+      const status={opening:"Opening deal · no track plan yet",waiting:"Drawing during the opening wait · no ticket route planned",
+        rush:"Adaptive is racing for long tracks · no ticket route planned",long_routes:"Pursuing long tracks · no ticket route planned"};
+      ui.planDetail.textContent=status[plan.mode];
+    }
+    for(const rid of segments){
+      const track=paths[rid], d=track.getAttribute("d");
+      if(selectedTicket!==null){
+        labelCities.add(routes[rid].a);labelCities.add(routes[rid].b);
+      }
+      useSVG("path",{d,fill:"none",stroke:seatColor(seat),"stroke-width":8,"stroke-opacity":.18},planLayer);
+      for(const [stroke,width] of [["var(--background)",5.2],["var(--foreground)",3.4]]){
+        useSVG("path",{d,fill:"none",stroke,"stroke-width":width,"stroke-linecap":"round","stroke-dasharray":"0 7"},planLayer);
+      }
+      if(f.owners[rid]!==undefined && f.owners[rid]!==seat && !plan.borrowed.includes(rid)){
+        const {x,y}=track.getPointAtLength(track.getTotalLength()/2);
+        const cross="M"+(x-5)+","+(y-5)+"l10,10m0,-10l-10,10";
+        for(const [stroke,width] of [["var(--background)",5.5],["var(--foreground)",2.6]]){
+          useSVG("path",{d:cross,fill:"none",stroke,"stroke-width":width,"stroke-linecap":"round","data-blocked":rid},planLayer);
+        }
+      }
+    }
+  }
+  function focusBlock(block,move){
+    ui.ticketSeat.value=String(block.seat);lastTicketSeat=block.seat;selectedTicket=block.ticket;
+    seek(move);
+  }
+  function showBlocks(seat){
+    ui.blocks.replaceChildren();
+    for(const block of blocks){
+      const inspecting=seat===block.seat && (selectedTicket===null || selectedTicket===block.ticket);
+      const atClaim=step===block.move, atDecision=step===block.next;
+      if(!atClaim && !(inspecting && (atDecision || (step>block.move && step<(block.next??g.events.length+1)))))continue;
+      const row=document.createElement("div"), r=routes[block.route], who="P"+(block.seat+1);
+      const track=cities[r.a]+"–"+cities[r.b];
+      const button=(label,move)=>{
+        const b=text("button",label,row);b.type="button";b.className="btn text-small";b.onclick=()=>focusBlock(block,move);
+      };
+      if(atDecision){
+        const path=frames[step].people[seat].plan.paths?.[block.ticket];
+        const old=itinerary(block.ticket,block.path);
+        let update="Previous plan";
+        if(path){
+          const same=itinerary(block.ticket,path)===old;
+          update=same && !path.includes(block.route)?"Switched to the parallel track":
+            path.includes(block.route)?"Kept the track through a station":"Rerouted";
+        }
+        text("div",update+" · before move "+block.move+" · "+old,row);
+        button("Back to the blocked track",block.move);
+      }else{
+        text("div","P"+(block.actor+1)+" claimed "+track+" on "+who+"’s planned route.",row);
+        if(!inspecting || selectedTicket!==block.ticket)button("Show "+who+"’s blocked ticket",block.move);
+        if(block.next!==null)button("See "+who+"’s next decision",block.next);
+        else text("div","The game ends before "+who+" plays again.",row);
+      }
+      ui.blocks.append(row);
+    }
+  }
   function placeCityLabels(endpoints,focus,width){
     const fontSize=Math.max(11,11*664/width);
     const occupied=[];
@@ -370,6 +476,8 @@
     const width=svg.getBoundingClientRect().width||650;
     const ticketSeat=ui.ticketSeat.value==="turn"?Math.max(0,i):Number(ui.ticketSeat.value);
     const endpoints=ticketEndpoints(f.people[ticketSeat],ticketSeat,end);
+    const labelCities=new Set(focus);
+    showPlans(f,ticketSeat,labelCities);showBlocks(ticketSeat);
     for(const [id,ring] of Object.entries(ticketRings)){
       const active=focus.has(id),owner=f.stations[id],mark=stationMarks[id];
       mark.setAttribute("display",owner===undefined?"none":"inline");if(owner!==undefined)mark.setAttribute("fill",seatColor(owner));
@@ -382,7 +490,7 @@
         ring.setAttribute("stroke-dasharray",marker.complete?"3 2":"none");
       }
     }
-    placeCityLabels(endpoints,focus,width);
+    placeCityLabels(endpoints,labelCities,width);
     ui.players.replaceChildren();
     f.people.forEach((p,s)=>{
       const row=document.createElement("tr"),cell=document.createElement("td"),dot=document.createElement("span");
@@ -408,6 +516,11 @@
   };
   ui.prev.onclick=()=>seek(step-1);ui.next.onclick=()=>seek(step+1);ui.scrub.oninput=()=>seek(+ui.scrub.value);
   ui.jump.onchange=()=>{const v=ui.jump.value;ui.jump.value="";
+    if(v==="block"){
+      const block=blocks.find(b=>b.move>step)??blocks[0];
+      if(block)focusBlock(block,block.move);
+      return;
+    }
     if(v==="draw"||v==="blind"){
       const moves=v==="draw"?drawMoves:blindMoves;
       if(moves.length)seek(moves.find(move=>move>step)??moves[0]);
@@ -424,7 +537,15 @@
     if(s && Object.hasOwn(data.tables,s.table) && ["18","25"].includes(s.wait)&&Number.isInteger(s.move)&&s.move>=0){
       stop();ui.table.value=table=s.table;ui.wait.value=wait=s.wait;
       opened(s.move,s.ticketSeat??"turn",Number.isInteger(s.ticket)?s.ticket:null);
-    }else opened();
+    }else{
+      const query=new URLSearchParams(window.location.search);
+      if(Object.hasOwn(data.tables,query.get("table")) && ["18","25"].includes(query.get("wait"))){
+        ui.table.value=table=query.get("table");ui.wait.value=wait=query.get("wait");
+        opened();
+        const block=blocks.find(b=>b.move===Number(query.get("block")));
+        if(block)focusBlock(block,block.move);
+      }else opened();
+    }
   }
   restore(window.openai?.widgetState);
   window.addEventListener("openai:set_globals",ev=>{if(ev.detail?.globals?.widgetState)restore(ev.detail.globals.widgetState)});
