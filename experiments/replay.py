@@ -18,7 +18,7 @@ def record(board, tickets, opponents, seed, seat, wait):
     lineup = [replace(Policy.named("finish"), wait=wait), *(Policy.named(n) for n in opponents)]
     lineup = lineup[-seat:] + lineup[:-seat]
     replay = {"seed": seed, "seat": seat, "policies": [p.name for p in lineup], "events": []}
-    previous_done = []
+    previous_done = [[] for _ in lineup]
     hands = []
 
     def observe(game, turn, move):
@@ -48,10 +48,12 @@ def record(board, tickets, opponents, seed, seat, wait):
         hands[actor] = p.hand.copy()
         event["hand_after"] = dict(+p.hand)
         event["hand"] = p.hand.total()
-        # A new opponent track can complete a ticket through an existing station.
-        done = [tickets.index(t) for t in game.ticket_result(game.players[seat])[0]]
-        if done != previous_done:
-            event["done"] = previous_done = done
+        if kind in ("claim", "station", "tickets"):
+            # An opponent's new track may complete a ticket through a station.
+            done = [[tickets.index(t) for t in game.ticket_result(player)[0]]
+                    for player in game.players]
+            if done != previous_done:
+                event["completed_by_seat"] = previous_done = done
         replay["events"].append(event)
 
     result = play(board, tickets, lineup, seed, observe=observe)

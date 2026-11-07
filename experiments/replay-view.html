@@ -15,15 +15,20 @@
     <div class="pick-groups" data-ui="market"></div>
     <div data-ui="payment"></div>
   </section>
-  <details class="rail-hands"><summary data-ui="handsCaption">All four hands</summary><div class="hands-grid" data-ui="hands"></div></details>
+  <details class="rail-hands"><summary data-ui="handsCaption">All four hands and tickets</summary><div class="hands-grid" data-ui="hands"></div></details>
   <div class="replay-stage">
-    <svg class="rail-board" role="img" aria-label="Classic Europe game board. Gray tracks are unclaimed; colored tracks belong to the four players."></svg>
+    <div>
+      <label class="replay-jump">Tickets on map <select class="form-select" data-ui="ticketSeat"><option value="turn">Follow turn</option></select></label>
+      <svg class="rail-board" role="img" aria-label="Classic Europe board with ticket endpoints."></svg>
+      <h3 data-ui="ticketTitle"></h3>
+      <div class="text-small ticket-key"><span class="ring-key"></span>Unfinished <span class="ring-key finished"></span>Complete · Select a ticket to isolate its cities.</div>
+      <div class="ticket-list" data-ui="tickets"></div>
+    </div>
     <div class="replay-notes">
       <div class="text-small text-muted" data-ui="time"></div>
       <h3 data-ui="action" aria-live="polite"></h3>
       <div class="text-small" data-ui="detail"></div>
       <table class="table table-sm"><caption data-ui="caption">Players</caption><thead><tr><th>Seat / strategy</th><th>Hand</th><th>Trains</th><th data-ui="scoreLabel">Track pts</th></tr></thead><tbody data-ui="players"></tbody></table>
-      <div><h3>Hoard &amp; Finish tickets</h3><div class="text-small" data-ui="tickets"></div></div>
     </div>
   </div>
   <label class="form-label replay-slider"><span data-ui="position"></span><input class="form-range" type="range" min="0" step="1" data-ui="scrub" aria-label="Replay move"></label>
@@ -33,6 +38,11 @@
 #europe-replay .replay-stage {display:grid;grid-template-columns:minmax(0,1.7fr) minmax(16em,1fr);align-items:center;gap:1.15em}
 #europe-replay .replay-notes {display:grid;gap:.45em}
 #europe-replay .rail-board {display:block;width:100%;overflow:visible}
+#europe-replay .ticket-list {display:flex;flex-wrap:wrap;gap:.35em;margin-top:.4em}
+#europe-replay .ticket-key {margin-top:.25em}
+#europe-replay .ring-key {display:inline-block;width:.75em;height:.75em;border:2px solid currentColor;border-radius:50%}
+#europe-replay .ring-key.finished {border-style:dashed;margin-left:.4em}
+#europe-replay .ticket-list [aria-pressed="true"] {font-weight:bold;text-decoration:underline}
 #europe-replay .replay-jump {display:flex;align-items:center;gap:.45em;white-space:nowrap}
 #europe-replay .pick-groups {display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,21em),1fr));gap:.6em 1.25em}
 #europe-replay .pick-row {display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:.26em;margin:.35em 0}
@@ -96,8 +106,9 @@
   };
   const text=(tag,value,parent)=>{const e=document.createElement(tag);e.textContent=value;parent.append(e);return e};
   let table="regular", wait="18", step=0, timer=null, frames=[], g, split;
+  let selectedTicket=null, lastTicketSeat=null;
   let drawMoves=[], blindMoves=[];
-  const paths={}, nodes={}, labels={}, stationMarks={};
+  const paths={}, nodes={}, labels={}, stationMarks={}, ticketRings={};
   const ringLayer=useSVG("g",{}), trackLayer=useSVG("g",{}), highlightLayer=useSVG("g",{}), cityLayer=useSVG("g",{}), labelLayer=useSVG("g",{});
   const glow=useSVG("path",{fill:"none",stroke:"var(--foreground)","stroke-width":8,"stroke-opacity":.22,"stroke-linecap":"round"},ringLayer);
   const groups={};
@@ -113,6 +124,7 @@
     paths[id]=p;
   }
   for(const [id,[x,y]] of Object.entries(xy)){
+    ticketRings[id]=useSVG("circle",{cx:x,cy:y,r:7,fill:"none","stroke-width":2,"vector-effect":"non-scaling-stroke",display:"none"},cityLayer);
     const n=useSVG("circle",{cx:x,cy:y,r:2.5,fill:"var(--background)",stroke:"var(--muted-foreground)","stroke-width":1},cityLayer);
     useSVG("title",{},n).textContent=cities[id];nodes[id]=n;
     stationMarks[id]=useSVG("rect",{x:x-4,y:y-4,width:8,height:8,display:"none"},cityLayer);
@@ -120,22 +132,25 @@
     labels[id].textContent=cities[id];
   }
   function buildFrames(game){
-    const people=game.initial.map((ts,seat)=>({cards:4,hand:game.opening_hands[seat],trains:45,points:0,ts:[...ts]}));
-    const owners={},stations={};let done=[];
-    const frame=()=>({people:people.map(p=>({...p,ts:[...p.ts]})),owners:{...owners},stations:{...stations},done:[...done]});
+    const people=game.initial.map((ts,seat)=>({cards:4,hand:game.opening_hands[seat],trains:45,points:0,ts:[...ts],completed:[]}));
+    const owners={},stations={};
+    const frame=()=>({people:people.map(p=>({...p,ts:[...p.ts]})),owners:{...owners},stations:{...stations}});
     const result=[frame()];
     game.events.forEach((e,k)=>{
       const i=k%people.length,p=people[i];p.cards=e.hand;p.hand=e.hand_after;
       if(e.kind==="claim"){const r=routes[e.target];owners[e.target]=i;p.trains-=r.length;p.points+=r.points}
       if(e.kind==="station")stations[e.target]=i;
       if(e.kind==="tickets")p.ts.push(e.kept);
-      if(e.done)done=e.done;
+      if(e.completed_by_seat)people.forEach((person,seat)=>{person.completed=e.completed_by_seat[seat]});
       result.push(frame());
     });
     return result;
   }
-  function opened(at){
+  function opened(at,view=ui.ticketSeat.value,ticket=null){
     const pair=data.tables[table];g=pair[wait];frames=buildFrames(g);
+    ui.ticketSeat.replaceChildren(new Option("Follow turn","turn"),...g.policies.map((_,s)=>new Option(seatName(g,s),String(s))));
+    ui.ticketSeat.value=[...ui.ticketSeat.options].some(o=>o.value===view)?view:"turn";
+    selectedTicket=ticket;lastTicketSeat=null;
     const other=pair[wait==="18"?"25":"18"].events;
     const first=g.events.findIndex((e,i)=>JSON.stringify(e)!==JSON.stringify(other[i]));
     split=first<0?Math.min(other.length,g.events.length):first+1;
@@ -252,15 +267,88 @@
         text("div","No legal second pick remained.",group).className="text-small";
     });
   }
+  function ticketText(ticket,complete,end){
+    const [a,b,points]=data.tickets[ticket];
+    const value=complete?"+"+points:end?"−"+points:points;
+    const status=complete?"complete":end?"missed":"open";
+    return cities[a]+" – "+cities[b]+" · "+value+" · "+status;
+  }
+  function ticketEndpoints(person,seat,end){
+    if((lastTicketSeat!==null && seat!==lastTicketSeat) || !person.ts.includes(selectedTicket))selectedTicket=null;
+    lastTicketSeat=seat;
+    ui.ticketTitle.textContent=seatName(g,seat)+" · Destination tickets";
+    const listKey=seat+"/"+person.ts.join(",");
+    if(ui.tickets.dataset.key!==listKey){
+      ui.tickets.replaceChildren();
+      for(const ticket of person.ts){
+        const button=document.createElement("button");
+        button.type="button";
+        button.className="btn text-small";
+        button.dataset.ticket=ticket;
+        ui.tickets.append(button);
+      }
+      ui.tickets.dataset.key=listKey;
+    }
+    const endpoints=new Map();
+    person.ts.forEach((ticket,index)=>{
+      const complete=person.completed.includes(ticket);
+      const button=ui.tickets.children[index];
+      button.textContent=(index+1)+". "+ticketText(ticket,complete,end);
+      button.setAttribute("aria-pressed",String(selectedTicket===ticket));
+      if(selectedTicket!==null && selectedTicket!==ticket)return;
+      const [a,b]=data.tickets[ticket];
+      for(const city of [a,b]){
+        const marker=endpoints.get(city)??{numbers:[],complete:true};
+        marker.numbers.push(index+1);
+        marker.complete=marker.complete && complete;
+        endpoints.set(city,marker);
+      }
+    });
+    svg.setAttribute("aria-label","Europe board. Ticket endpoints for "+seatName(g,seat)+": "+[...endpoints.keys()].map(id=>cities[id]).join(", ")+".");
+    return endpoints;
+  }
+  function placeCityLabels(endpoints,focus,width){
+    const fontSize=Math.max(11,11*664/width);
+    const occupied=[];
+    const cityIds=new Set([...endpoints.keys(),...focus,...(width<500?["madrid","stockholm","moskva"]:hubs)]);
+    for(const [id,label] of Object.entries(labels))label.style.display=cityIds.has(id)?"":"none";
+    for(const id of cityIds){
+      const label=labels[id],marker=endpoints.get(id),[x,y]=xy[id];
+      label.textContent=(marker?marker.numbers.join("/")+" · ":"")+cities[id];
+      label.style.fontSize=fontSize+"px";
+      label.style.fontWeight=marker?"bold":"";
+      label.setAttribute("text-anchor","start");
+      const length=label.getComputedTextLength();
+      const left=x-length-5, right=x+5;
+      const sides=x>510?[left,right]:[right,left];
+      let placed=false;
+      for(const offset of [-9,fontSize+9,-9-fontSize,2*fontSize+9]){
+        for(const side of sides){
+          const tx=Math.max(7,Math.min(665-length,side));
+          const ty=Math.max(9+fontSize,Math.min(436,y+offset));
+          const box={left:tx-2,right:tx+length+2,top:ty-fontSize,bottom:ty+3};
+          if(occupied.some(b=>box.left<b.right && box.right>b.left && box.top<b.bottom && box.bottom>b.top))continue;
+          label.setAttribute("x",tx);label.setAttribute("y",ty);
+          occupied.push(box);placed=true;break;
+        }
+        if(placed)break;
+      }
+      if(!placed)label.style.display="none";
+    }
+  }
   function render(){
     const f=frames[step], e=g.events[step-1], i=(step-1)%g.policies.length, end=step===g.events.length;
-    const small=svg.getBoundingClientRect().width<500;
     svg.setAttribute("viewBox","5 7 664 433");
     const [headline,detail]=eventText(e,i);
     renderMarket(e,i);
-    ui.handsCaption.textContent=step?"All four hands after move "+step:"All four opening hands";
+    ui.handsCaption.textContent=step?"All four hands and tickets after move "+step:"All four opening hands and tickets";
     ui.hands.replaceChildren();
-    f.people.forEach((person,seat)=>showHand(ui.hands,seatName(g,seat),person.hand));
+    f.people.forEach((person,seat)=>{
+      const group=document.createElement("div");
+      showHand(group,seatName(g,seat),person.hand);
+      for(const ticket of person.ts)text("div",ticketText(ticket,person.completed.includes(ticket),end),group).className="text-small";
+      ui.hands.append(group);
+    });
     ui.time.textContent="Seed "+g.seed+"  ·  "+(step?"Round "+Math.ceil(step/4):"Setup")+
       (step===g.trigger?"  ·  Final round triggered":step>g.trigger?"  ·  Final round":step===split?"  ·  First difference":"");
     ui.action.textContent=end?(g.winners.length===1?"Winner: ":"Shared first: ")+g.winners.map(s=>seatName(g,s)).join(" / "):headline;
@@ -280,13 +368,21 @@
     }
     const focus=new Set(current?[current.a,current.b]:e?.kind==="station"?[e.target]:[]);
     const width=svg.getBoundingClientRect().width||650;
-    for(const [id,el] of Object.entries(labels)){
+    const ticketSeat=ui.ticketSeat.value==="turn"?Math.max(0,i):Number(ui.ticketSeat.value);
+    const endpoints=ticketEndpoints(f.people[ticketSeat],ticketSeat,end);
+    for(const [id,ring] of Object.entries(ticketRings)){
       const active=focus.has(id),owner=f.stations[id],mark=stationMarks[id];
       mark.setAttribute("display",owner===undefined?"none":"inline");if(owner!==undefined)mark.setAttribute("fill",seatColor(owner));
       nodes[id].setAttribute("r",active?4:2.5);
-      el.style.display=active||(!small&&hubs.includes(id))||(small&&["madrid","stockholm","moskva"].includes(id))?"":"none";
-      el.style.fontSize=Math.max(11,11*664/width)+"px";
+      const marker=endpoints.get(id);
+      ring.setAttribute("display",marker?"inline":"none");
+      if(marker){
+        ring.setAttribute("r",Math.max(7,5*664/width));
+        ring.setAttribute("stroke",seatColor(ticketSeat));
+        ring.setAttribute("stroke-dasharray",marker.complete?"3 2":"none");
+      }
     }
+    placeCityLabels(endpoints,focus,width);
     ui.players.replaceChildren();
     f.people.forEach((p,s)=>{
       const row=document.createElement("tr"),cell=document.createElement("td"),dot=document.createElement("span");
@@ -295,15 +391,21 @@
       ui.players.append(row);
     });
     ui.caption.textContent=end?"Final standings by seat":"Players";ui.scoreLabel.textContent=end?"Final pts":"Track pts";
-    ui.tickets.replaceChildren();
-    for(const t of f.people[g.seat].ts){const [a,b,pts]=data.tickets[t],done=f.done.includes(t);
-      text("div",(done?"✓ ":end?"✕ ":"○ ")+cities[a]+" – "+cities[b]+" · "+(done?"+":end?"−":"")+pts+(done?" · complete":end?" · missed":" · open"),ui.tickets);}
   }
   function stop(){if(timer!==null)clearInterval(timer);timer=null}
-  function save(){window.openai?.setWidgetState?.({modelContent:{table,wait,move:step}})?.catch(()=>{})}
+  function save(){window.openai?.setWidgetState?.({modelContent:{table,wait,move:step,ticketSeat:ui.ticketSeat.value,ticket:selectedTicket}})?.catch(()=>{})}
   function seek(n){stop();step=Math.max(0,Math.min(n,g.events.length));render();save()}
   ui.table.onchange=()=>{stop();table=ui.table.value;opened();save()};
   ui.wait.onchange=()=>{stop();wait=ui.wait.value;opened(step);save()};
+  ui.ticketSeat.onchange=()=>{stop();selectedTicket=null;render();save()};
+  ui.tickets.onclick=event=>{
+    const button=event.target.closest("button[data-ticket]");
+    if(!button)return;
+    stop();
+    const ticket=Number(button.dataset.ticket);
+    selectedTicket=selectedTicket===ticket?null:ticket;
+    render();save();
+  };
   ui.prev.onclick=()=>seek(step-1);ui.next.onclick=()=>seek(step+1);ui.scrub.oninput=()=>seek(+ui.scrub.value);
   ui.jump.onchange=()=>{const v=ui.jump.value;ui.jump.value="";
     if(v==="draw"||v==="blind"){
@@ -320,7 +422,8 @@
   function restore(state){
     const s=state?.modelContent;
     if(s && Object.hasOwn(data.tables,s.table) && ["18","25"].includes(s.wait)&&Number.isInteger(s.move)&&s.move>=0){
-      stop();ui.table.value=table=s.table;ui.wait.value=wait=s.wait;opened(s.move);
+      stop();ui.table.value=table=s.table;ui.wait.value=wait=s.wait;
+      opened(s.move,s.ticketSeat??"turn",Number.isInteger(s.ticket)?s.ticket:null);
     }else opened();
   }
   restore(window.openai?.widgetState);

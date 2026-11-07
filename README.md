@@ -10,7 +10,7 @@ Explore the [paired wait comparison](docs/europe-wait-comparison.md) or the [six
 
 Choose **Jump to → Next face-down draw** to inspect a blind pick. Each pick shows the face-up market before the choice, the card taken, and whether it came from the market or the deck.
 
-Each pick also shows the acting player's hand before that pick. Track claims and stations show the cards paid and the hand left over. Expand **All four hands** to see every player's colors at the current move. [Read the article and play online](https://devmarkuslejon.github.io/projects/ticket-to-ride/).
+Each pick shows the acting player's hand before that pick. Track claims and stations show the cards paid and the hand left over. The board follows the acting player's destination tickets. Select a ticket to isolate its two cities, or use **Tickets on map** to follow a particular player. Expand **All four hands and tickets** to inspect the whole table. [Read the article and play online](https://devmarkuslejon.github.io/projects/ticket-to-ride/).
 
 The viewer includes the first matched deal at each tournament table. To watch another, run `python -m experiments.replay --deal 7 --out replay-7.html` (deal indices 0–4095). Each replay is a single file that works offline.
 

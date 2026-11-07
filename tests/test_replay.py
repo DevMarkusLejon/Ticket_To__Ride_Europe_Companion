@@ -17,7 +17,8 @@ def test_replay_matches_published_pairs_from_a_rotated_seat():
             assert len(game["events"]) == int(row[f"actions_{wait}"])
             assert game["scores"][seat]["points"] == int(row[f"points_{wait}"])
             assert (game["winners"] == [seat]) == bool(int(row[f"win_{wait}"]))
-            completed = []
+            kept = [set(tickets) for tickets in game["initial"]]
+            completed = [[] for _ in kept]
             trains = [45] * 4
             hands = [Counter(cards) for cards in game["opening_hands"]]
             assert all(hand.total() == 4 for hand in hands)
@@ -35,5 +36,9 @@ def test_replay_matches_published_pairs_from_a_rotated_seat():
                     assert min(trains) > 2
                 if turn == game["trigger"]:
                     assert trains[(turn - 1) % 4] <= 2
-                completed = event.get("done", completed)
-            assert len(completed) == int(row[f"completed_{wait}"])
+                if event["kind"] == "tickets":
+                    kept[(turn - 1) % 4].add(event["kept"])
+                completed = event.get("completed_by_seat", completed)
+                assert all(set(done) <= held for done, held in zip(completed, kept, strict=True))
+            assert [len(done) for done in completed] == [s["completed"] for s in game["scores"]]
+            assert len(completed[seat]) == int(row[f"completed_{wait}"])
